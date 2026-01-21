@@ -49,4 +49,206 @@
     /* Cards */
     .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; perspective: 1000px; }
     .fate { height: 180px; cursor: pointer; }
-    .fateInner { position: relative; width: 100
+    .fateInner { position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d; }
+    .fate.revealed .fateInner { transform: rotateY(180deg); }
+    .fateFace { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 15px; border: 1px solid rgba(216,178,92,0.3); padding: 15px; display: flex; flex-direction: column; justify-content: center; background: rgba(15, 15, 25, 0.9); }
+    .fateBack { transform: rotateY(180deg); background: rgba(25, 20, 45, 0.95); }
+    #cardC { grid-column: 1 / -1; display: none; opacity: 0; transition: 1s; padding: 20px; border: 2px solid var(--gold); border-radius: 15px; background: rgba(216,178,92,0.1); margin-top: 20px; }
+    #cardC.show { display: block; opacity: 1; }
+    .receipt-img { width: 100%; border-radius: 5px; margin-top: 10px; border: 1px solid var(--gold); }
+
+    button { padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; font-family: var(--mono); transition: 0.3s; }
+    .primary { background: linear-gradient(45deg, var(--gold), #f9d98e); color: #333; }
+    .primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    @media (max-width: 500px) { .cards { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  
+  <div class="cloud"></div><div class="cloud"></div>
+
+  <main class="wrap">
+    <section class="card-container">
+      
+      <div id="boardingPass">
+        <div class="bp-header"><h2>BOARDING PASS</h2><span>✈️</span></div>
+        <div class="bp-info">
+          <div class="bp-field">PASSENGER<span>ADDIE</span></div>
+          <div class="bp-field">DATE<span>MAR 06, 2026</span></div>
+          <div class="bp-field">FROM<span>TAIWAN (TPE)</span></div>
+          <div class="bp-field">TO<span>EUROPE (???)</span></div>
+        </div>
+        <div class="barcode"></div>
+        <div style="text-align:center; margin-top:20px;">
+          <button class="primary" id="startBtn">START JOURNEY</button>
+        </div>
+      </div>
+
+      <div id="airplaneScene">
+        <img src="https://cdn-icons-png.flaticon.com/512/984/984233.png" class="airplane">
+        <h2 class="checkin-status" id="statusText">尚未開放 Check-in</h2>
+        <p id="statusDesc" style="font-size:14px; color:rgba(255,255,255,0.8); margin-bottom:20px;">
+          飛行員正在確認航線，請稍候。
+        </p>
+        <div id="checkinTimer" style="font-family:var(--mono); font-size:14px; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;"></div>
+        <button class="primary" id="finalEntryBtn" style="display:none; margin-top:20px;">立即登機！</button>
+      </div>
+
+      <div id="flow">
+        <h2 style="font-family:var(--display); color:var(--gold); margin-bottom:5px;">Hi, Addie!</h2>
+        <div class="countdown">
+          <div class="tile"><span class="num" id="d">0</span><span class="label">DAYS</span></div>
+          <div class="tile"><span class="num" id="h">0</span><span class="label">HRS</span></div>
+          <div class="tile"><span class="num" id="m">0</span><span class="label">MINS</span></div>
+          <div class="tile"><span class="num" id="s">0</span><span class="label">SECS</span></div>
+        </div>
+        <div class="journey-wrap">
+          <div style="font-family:var(--mono); font-size:10px; color:var(--gold); margin-bottom:5px;">EUROPE QUEST: <span id="percentText">0</span>%</div>
+          <div class="progress-bar"><div class="progress-fill" id="barFill"></div></div>
+          <p id="travelStatus" style="font-size:12px; font-style:italic; margin-top:8px;"></p>
+        </div>
+        <p id="openingText" style="font-size:15px; font-style:italic; margin:20px 0;"></p>
+        <div class="cards">
+          <div class="fate" id="cardA" onclick="handlePick('A')">
+            <div class="fateInner">
+              <div class="fateFace">Card A<br><small style="color:var(--gold)">tap to pick</small></div>
+              <div class="fateFace fateBack">
+                <div style="font-family:var(--display); color:var(--gold);">A CUT · 國賓</div>
+                <div id="metaA" style="font-size:12px; margin-top:10px;"></div>
+                <a id="linkA" target="_blank" style="color:var(--gold); font-size:11px; margin-top:10px;">View Map</a>
+              </div>
+            </div>
+          </div>
+          <div class="fate" id="cardB" onclick="handlePick('B')">
+            <div class="fateInner">
+              <div class="fateFace">Card B<br><small style="color:var(--gold)">tap to pick</small></div>
+              <div class="fateFace fateBack">
+                <div style="font-family:var(--display); color:var(--gold);">漢來飯店一晚</div>
+                <div id="metaB" style="font-size:12px; margin-top:10px;"></div>
+                <a id="linkB" target="_blank" style="color:var(--gold); font-size:11px; margin-top:10px;">View Map</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="cardC">
+          <div style="font-family:var(--display); color:var(--gold); font-size:18px;">Actually... 🎁</div>
+          <p id="metaC" style="font-size:13px;"></p>
+          <div style="display:flex; gap:10px;">
+            <img src="" id="imgA" class="receipt-img">
+            <img src="" id="imgB" class="receipt-img">
+          </div>
+        </div>
+        <div id="stepActions" style="display:none; justify-content:center; margin-top:20px;">
+          <button class="primary" id="revealOtherBtn">看看另一個選項</button>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    const CONFIG = {
+      targetDate: "2026-03-06T00:00:00",
+      checkinTime: "2024-07-20T10:00:00", // 👈 修改這裡：設定妳要開放的時間
+      sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXXXXXXXX/pub?output=csv", 
+      mapA: "https://maps.app.goo.gl/9", 
+      mapB: "https://maps.app.goo.gl/10",
+      receiptA: "妳的圖片1", receiptB: "妳的圖片2",
+      textA: "2026/3/6 19:00\n只要美美地出現就好💕",
+      textB: "2026/3/7 Check-in\n隔天還有島語早餐唷！",
+      textC: "看妳在那邊選這麼久，其實我全都訂了啦！\n生日行程就是 A CUT 晚餐 + 漢來住一晚！",
+      opening: "Pick a card 🃏 Choose your fate ✨\n由命運決定你今年的生日怎麼過"
+    };
+
+    let picked = null;
+
+    // 1. 處理登機證點擊
+    document.getElementById('startBtn').onclick = function() {
+      document.getElementById('boardingPass').style.display = 'none';
+      document.getElementById('airplaneScene').style.display = 'flex';
+      checkTimeStatus();
+    };
+
+    // 2. 檢查時間狀態
+    function checkTimeStatus() {
+      const now = new Date();
+      const openTime = new Date(CONFIG.checkinTime);
+      const diff = openTime - now;
+
+      if (diff <= 0) {
+        document.getElementById('statusText').innerText = "Check-in 已開放！";
+        document.getElementById('statusDesc').innerText = "艙門已開啟，請準備進入驚喜航線。";
+        document.getElementById('checkinTimer').style.display = 'none';
+        document.getElementById('finalEntryBtn').style.display = 'inline-block';
+      } else {
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        document.getElementById('checkinTimer').innerText = `距離登機還有：${d}天 ${h}時 ${m}分 ${s}秒`;
+        setTimeout(checkTimeStatus, 1000);
+      }
+    }
+
+    // 3. 進入主畫面
+    document.getElementById('finalEntryBtn').onclick = function() {
+      document.getElementById('airplaneScene').style.display = 'none';
+      document.getElementById('flow').style.display = 'block';
+      startMainApp();
+    };
+
+    function startMainApp() {
+      document.getElementById("openingText").innerText = CONFIG.opening;
+      document.getElementById("linkA").href = CONFIG.mapA;
+      document.getElementById("linkB").href = CONFIG.mapB;
+      document.getElementById("imgA").src = CONFIG.receiptA;
+      document.getElementById("imgB").src = CONFIG.receiptB;
+      document.getElementById("metaA").innerText = CONFIG.textA;
+      document.getElementById("metaB").innerText = CONFIG.textB;
+      document.getElementById("metaC").innerText = CONFIG.textC;
+      setInterval(updateCountdown, 1000);
+      setInterval(syncProgress, 30000);
+      syncProgress();
+    }
+
+    async function syncProgress() {
+      try {
+        const res = await fetch(CONFIG.sheetUrl + "&t=" + Date.now());
+        const data = await res.text();
+        const rows = data.split("\n");
+        const cols = rows[1].split(",");
+        document.getElementById("barFill").style.width = cols[0] + "%";
+        document.getElementById("percentText").innerText = cols[0];
+        document.getElementById("travelStatus").innerText = "📍 " + cols[1];
+      } catch (e) { }
+    }
+
+    function updateCountdown() {
+      const diff = new Date(CONFIG.targetDate) - Date.now();
+      if (diff <= 0) return;
+      document.getElementById("d").innerText = Math.floor(diff / 86400000);
+      document.getElementById("h").innerText = Math.floor((diff % 86400000) / 3600000);
+      document.getElementById("m").innerText = Math.floor((diff % 3600000) / 60000);
+      document.getElementById("s").innerText = Math.floor((diff % 60000) / 1000);
+    }
+
+    window.handlePick = function(id) {
+      if (picked) return;
+      picked = id;
+      document.getElementById("card" + id).classList.add("revealed");
+      document.getElementById("stepActions").style.display = "flex";
+    };
+
+    document.getElementById("revealOtherBtn").onclick = () => {
+      const otherId = (picked === 'A') ? 'cardB' : 'cardA';
+      document.getElementById(otherId).classList.add("revealed");
+      document.getElementById("revealOtherBtn").style.display = "none";
+      setTimeout(() => {
+        const c = document.getElementById("cardC");
+        c.classList.add("show");
+        c.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 3000);
+    };
+  </script>
+</body>
+</html>
