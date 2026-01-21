@@ -122,7 +122,9 @@
   </div>
 
   <script>
-    const CONFIG = { sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5jpWMX7wsapbbktd_fSsiTt4upzxxGi1ydGf9Wt8dfUISCvcdgzZ3oNc6ClwBB8AebBUgmZFvO-lV/pub?output=csv" };
+const CONFIG = { 
+  sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5jpWMX7wsapbbktd_fSsiTt4upzxxGi1ydGf9Wt8dfUISCvcdgzZ3oNc6ClwBB8AebBUgmZFvO-lV/pubhtml" 
+};
 
     // 等距座標：5段飛行，圓點位置分別是 0, 20, 40, 60, 80, 100
     const NODE_POS = [0, 20, 40, 60, 80, 100]; 
@@ -172,8 +174,9 @@
       document.getElementById('airplaneScene').style.display = 'none';
       document.getElementById('trackerUI').style.display = 'block';
       setInterval(updateRadar, 1000); 
-      setInterval(syncSheet, 15000);
-      syncSheet(); updateRadar();
+      setInterval(syncSheet, 15000); // 每 15 秒更新一次
+syncSheet(); // 進入畫面立刻更新一次
+      
     };
 
     function updateRadar() {
@@ -227,7 +230,35 @@
         else { frame.style.display = 'none'; }
       } catch (e) { }
     }
-
+async function syncSheet() {
+      try {
+        console.log("正在嘗試連線 Google Sheet..."); // 妳可以在瀏覽器按 F12 看到這個
+        const res = await fetch(CONFIG.sheetUrl + "&t=" + Date.now());
+        const data = await res.text();
+        const rows = data.split("\n");
+        
+        // 抓取第二列 (index 1)
+        if (rows.length > 1) {
+          const cols = rows[1].split(","); 
+          // cols[1] 是 B 欄 (文字)，cols[2] 是 C 欄 (照片)
+          document.getElementById('sheetStatus').innerText = cols[1] || "Liz 正在趕路中...";
+          
+          const pUrl = cols[2] ? cols[2].trim() : "";
+          const frame = document.getElementById('photoFrame');
+          const img = document.getElementById('livePhoto');
+          
+          if (pUrl.length > 10) { 
+            img.src = pUrl; 
+            frame.style.display = 'block'; 
+          } else {
+            frame.style.display = 'none';
+          }
+        }
+      } catch (e) {
+        console.error("連線失敗:", e);
+        document.getElementById('sheetStatus').innerText = "衛星連線暫時中斷...";
+      }
+    }
     // ✨ 修正後的 BETA 控制函式 ✨
     function togglePanel() { 
       const p = document.getElementById('betaPanel'); 
@@ -245,5 +276,6 @@
   </script>
 </body>
 </html>
+
 
 
