@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Addie's Flight Radar - Liz Edition</title>
+  <title>Addie's Flight Radar - Final Call</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Orbitron:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -11,89 +11,75 @@
       --mono: "Orbitron", monospace; --display: "Cinzel", serif;
     }
     body { margin: 0; font-family: "Cormorant Garamond", serif; color: white; min-height: 100vh; background: linear-gradient(to bottom, var(--blue-sky), var(--deep-blue)); overflow-x: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    
-    .cloud { position: absolute; background: white; border-radius: 50%; opacity: 0.6; filter: blur(10px); z-index: 1; animation: float 25s infinite linear; }
-    @keyframes float { 0% { transform: translateX(-150px); } 100% { transform: translateX(100vw); } }
-
     .wrap { width: min(860px, 95%); z-index: 10; position: relative; }
     .card-container { background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 25px; padding: 30px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.4); text-align: center; }
 
-    /* Boarding Pass Styles */
-    #boardingPass { background: linear-gradient(160deg, #F0F8FF, #E0EBF5); color: #333; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); max-width: 400px; margin: 0 auto; text-align: left; font-family: var(--mono); border: 1px dashed rgba(0,0,0,0.1); position: relative; }
-    .bp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--deep-blue); padding-bottom: 10px; }
-    .bp-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-    .bp-field { font-size: 10px; color: #666; text-transform: uppercase; }
-    .bp-field span { display: block; font-size: 16px; font-weight: bold; color: #000; margin-top: 2px; }
-    .barcode { width: 100%; height: 45px; background: repeating-linear-gradient(90deg, #000 0 2px, #fff 2px 4px); margin-top: 20px; }
-
-    /* Scene Transitions */
+    /* UI Components */
+    #boardingPass { background: linear-gradient(160deg, #F0F8FF, #E0EBF5); color: #333; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); max-width: 400px; margin: 0 auto; text-align: left; font-family: var(--mono); }
     #airplaneScene { display: none; flex-direction: column; align-items: center; padding: 20px; }
     .airplane { width: 120px; animation: flyPlane 4s infinite ease-in-out; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3)); }
     @keyframes flyPlane { 0%, 100% { transform: translateY(0) rotate(5deg); } 50% { transform: translateY(-20px) rotate(3deg); } }
 
-    /* Real-time Tracker */
+    /* Radar UI */
     #trackerUI { display: none; }
-    .status-badge { display: inline-block; padding: 8px 25px; border-radius: 50px; background: var(--gold); color: #000; font-family: var(--mono); font-weight: 700; margin-bottom: 25px; animation: pulse 2s infinite; letter-spacing: 1px; }
+    .status-badge { display: inline-block; padding: 8px 25px; border-radius: 50px; background: var(--gold); color: #000; font-family: var(--mono); font-weight: 700; margin-bottom: 25px; animation: pulse 2s infinite; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(216,178,92, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(216,178,92, 0); } 100% { box-shadow: 0 0 0 0 rgba(216,178,92, 0); } }
 
-    /* Map UI */
-    .journey-map { position: relative; margin: 60px 0; padding: 0 25px; }
+    .journey-map { position: relative; margin: 80px 0 60px 0; padding: 0 25px; }
     .map-line { height: 6px; background: rgba(255,255,255,0.2); position: relative; border-radius: 10px; }
     .map-progress { height: 100%; background: var(--gold); width: 0%; position: absolute; border-radius: 10px; transition: width 0.5s linear; }
-    .plane-icon { position: absolute; top: -40px; font-size: 28px; transform: translateX(-50%); transition: left 0.5s linear; z-index: 15; }
+    
+    .plane-container { position: absolute; top: -50px; transform: translateX(-50%); transition: left 0.5s linear; z-index: 15; display: flex; flex-direction: column; align-items: center; }
+    .flight-tag { background: rgba(0, 0, 0, 0.8); color: #0f0; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 4px; border: 1px solid #0f0; margin-bottom: 5px; white-space: nowrap; box-shadow: 0 0 10px rgba(0,255,0,0.3); opacity: 0; pointer-events: none; }
+    .flight-tag.visible { opacity: 1; }
+    .plane-icon { font-size: 28px; }
+
     .node-wrap { display: flex; justify-content: space-between; position: absolute; top: -7px; left: 0; width: 100%; }
-    .node { width: 18px; height: 18px; background: #fff; border-radius: 50%; border: 3px solid var(--deep-blue); position: relative; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+    .node { width: 18px; height: 18px; background: #fff; border-radius: 50%; border: 3px solid var(--deep-blue); position: relative; }
     .node.reached { background: var(--gold); border-color: #fff; }
-    .node-label { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: bold; font-family: var(--mono); color: #fff; text-shadow: 1px 1px 2px #000; }
+    .node-label { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: bold; font-family: var(--mono); color: #fff; }
 
-    /* Report & Buttons */
-    .report-box { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); border-radius: 15px; padding: 20px; margin-top: 35px; box-shadow: inset 0 0 15px rgba(216,178,92,0.1); }
-    #sheetStatus { font-style: italic; color: var(--gold); font-size: 18px; margin-top: 10px; line-height: 1.4; }
-    button { padding: 12px 35px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; font-family: var(--mono); transition: 0.3s; background: var(--gold); color: #000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-    button:hover { transform: scale(1.05); background: #f9d98e; }
+    .report-box { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); border-radius: 15px; padding: 20px; margin-top: 35px; }
+    #sheetStatus { font-style: italic; color: var(--gold); font-size: 18px; margin-top: 10px; }
+    button { padding: 12px 35px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; font-family: var(--mono); background: var(--gold); color: #000; }
 
-    /* Beta Console Panel */
+    /* Beta Controls */
     #betaConsole { position: fixed; bottom: 10px; right: 10px; z-index: 999; }
     .beta-btn { font-size: 8px; padding: 4px 8px; background: rgba(0,0,0,0.3); color: #0f0; border: 1px solid #0f0; border-radius: 4px; cursor: pointer; }
-    .beta-panel { display: none; background: #111; padding: 12px; border: 1px solid #0f0; border-radius: 8px; width: 200px; }
-    .beta-panel button { width: 100%; font-size: 10px; padding: 6px; margin: 2px 0; background: #222; color: #0f0; text-align: left; box-shadow: none; border-radius: 4px; border: 1px solid #333; }
+    .beta-panel { display: none; background: #111; padding: 12px; border: 1px solid #0f0; border-radius: 8px; width: 230px; max-height: 80vh; overflow-y: auto; }
+    .beta-panel button { width: 100%; font-size: 10px; padding: 6px; margin: 2px 0; background: #222; color: #fff; text-align: left; border: 1px solid #444; }
   </style>
 </head>
 <body>
-
-  <div class="cloud" style="top:15%; left:10%;"></div>
-  <div class="cloud" style="top:45%; left:75%;"></div>
 
   <main class="wrap">
     <section class="card-container">
       
       <div id="boardingPass">
         <div class="bp-header"><h3>BOARDING PASS</h3><span>✈️</span></div>
-        <div class="bp-info">
-          <div class="bp-field">PASSENGER<span>ADDIE</span></div>
-          <div class="bp-field">FLIGHT<span>LIZ-2026</span></div>
-          <div class="bp-field">FROM<span>TAIWAN (TPE)</span></div>
-          <div class="bp-field">TO<span>EUROPE (UK/DE/FR)</span></div>
+        <div style="font-size: 11px; font-family: var(--mono); margin-bottom: 20px;">
+          PASSENGER: ADDIE<br>
+          FLIGHT: LIZ-2026<br>
+          MISSION: EUROPE ADVENTURE
         </div>
-        <div class="barcode"></div>
-        <div style="text-align:center; margin-top:30px;">
-          <button id="startBtn">START JOURNEY</button>
-        </div>
+        <div style="text-align:center;"><button id="startBtn">ACTIVATE RADAR</button></div>
       </div>
 
       <div id="airplaneScene">
         <img src="https://cdn-icons-png.flaticon.com/512/984/984233.png" class="airplane">
-        <h2 id="statusText" style="color:var(--gold); font-family:var(--display); margin-top:20px;">Check-in Verification</h2>
-        <p id="statusDesc" style="font-size:15px; opacity:0.8;">正在連線全球飛航管制系統...</p>
+        <h2 id="statusText" style="color:var(--gold); font-family:var(--display); margin-top:20px;">System Sync</h2>
         <div id="checkinTimer" style="font-family:var(--mono); font-size:14px; background:rgba(0,0,0,0.4); padding:15px 25px; border-radius:15px; margin: 20px 0;"></div>
-        <button id="finalEntryBtn" style="display:none;">PREPARE FOR TAKE OFF</button>
+        <button id="finalEntryBtn" style="display:none;">START TRACKING</button>
       </div>
 
       <div id="trackerUI">
-        <div class="status-badge" id="currentAction">RADAR ACTIVE</div>
+        <div class="status-badge" id="currentAction">INITIALIZING...</div>
         
         <div class="journey-map">
-          <div class="plane-icon" id="planeIcon">✈️</div>
+          <div class="plane-container" id="planeContainer">
+            <div class="flight-tag" id="flightTag">FR147</div>
+            <div class="plane-icon">✈️</div>
+          </div>
           <div class="map-line"><div class="map-progress" id="mapFill"></div></div>
           <div class="node-wrap">
             <div class="node" id="n0"><span class="node-label">TPE</span></div>
@@ -106,38 +92,38 @@
         </div>
 
         <div class="report-box">
-          <div style="font-size:11px; text-transform:uppercase; color:var(--gold); font-family:var(--mono); letter-spacing:2px;">Live Report From Liz:</div>
-          <div id="sheetStatus">Waiting for satellite signal...</div>
+          <div style="font-size:11px; text-transform:uppercase; color:var(--gold); font-family:var(--mono);">Status:</div>
+          <div id="sheetStatus">Establishing connection...</div>
         </div>
       </div>
-
     </section>
   </main>
 
   <div id="betaConsole">
     <div class="beta-panel" id="betaPanel">
-      <div style="color:#0f0; font-size:10px; margin-bottom:8px;">SIMULATION CONTROLS</div>
-      <button onclick="testState('PRE')">📍 T-Minus Countdown</button>
-      <button onclick="testState('FL_LGW')">✈️ Flight SQ312 (to UK)</button>
-      <button onclick="testState('STAY_LGW')">🇬🇧 Staying in London</button>
-      <button onclick="testState('STAY_BER')">🇩🇪 Staying in Berlin</button>
-      <button onclick="testState('FL_CDG')">✈️ Flight EJU5147 (to FR)</button>
-      <button onclick="testState('STAY_CDG')">🇫🇷 Staying in Paris</button>
-      <button onclick="testState('FL_TPE')">✈️ Flight TG636 (to TW)</button>
-      <button onclick="testState('FINISH')">🏠 Mission Complete</button>
+      <div style="color:#0f0; font-size:10px; margin-bottom:8px;">FLIGHT PHASE SIMULATION</div>
+      <button onclick="testTime('2026-02-13T22:00:00')">1. ✈️ TPE ➔ LGW (SQ312)</button>
+      <button onclick="testTime('2026-02-16T12:00:00')">2. 🇬🇧 STAYING UK</button>
+      <button onclick="testTime('2026-02-19T11:30:00')">3. ✈️ LGW ➔ BER (FR147)</button>
+      <button onclick="testTime('2026-02-21T12:00:00')">4. 🇩🇪 STAYING BER</button>
+      <button onclick="testTime('2026-02-23T07:15:00')">5. ✈️ BER ➔ CDG (EJU5147)</button>
+      <button onclick="testTime('2026-02-25T12:00:00')">6. 🇫🇷 STAYING CDG</button>
+      <button onclick="testTime('2026-02-28T18:00:00')">7. ✈️ CDG ➔ BKK (TG931)</button>
+      <button onclick="testTime('2026-03-01T10:00:00')">8. 🇹🇭 STAYING BKK (12H)</button>
+      <button onclick="testTime('2026-03-01T20:00:00')">9. ✈️ BKK ➔ TPE (TG636)</button>
+      <button onclick="testTime('2026-03-02T12:00:00')">10. 🏠 LANDED TPE</button>
       <button onclick="togglePanel()" style="background:#400; color:#fff; text-align:center;">CLOSE</button>
     </div>
     <div class="beta-btn" onclick="togglePanel()">BETA MODE</div>
   </div>
 
   <script>
-    // 航班數據庫 (包含班號)
     const FLIGHT_PLAN = [
-      { id: "SQ312", from: "TPE", to: "LGW", start: "2026-02-13T17:35:00", end: "2026-02-14T06:35:00", flag: "🇬🇧" },
-      { id: "SQ879", from: "LGW", to: "BER", start: "2026-02-19T10:00:00", end: "2026-02-19T13:35:00", flag: "🇩🇪" }, // 假設班號
-      { id: "EJU5147", from: "BER", to: "CDG", start: "2026-02-23T06:00:00", end: "2026-02-23T08:30:00", flag: "🇫🇷" },
-      { id: "TG931", from: "CDG", to: "BKK", start: "2026-02-28T12:00:00", end: "2026-03-01T06:00:00", flag: "🇹🇭" },
-      { id: "TG636", from: "BKK", to: "TPE", start: "2026-03-01T17:00:00", end: "2026-03-01T22:10:00", flag: "🇹🇼" }
+      { id: "SQ312", from: "TPE", to: "LGW", start: "2026-02-13T17:35:00", end: "2026-02-14T06:35:00", stayLabel: "STAYING UK 🇬🇧" },
+      { id: "FR147", from: "LGW", to: "BER", start: "2026-02-19T10:00:00", end: "2026-02-19T13:35:00", stayLabel: "STAYING BER 🇩🇪" },
+      { id: "EJU5147", from: "BER", to: "CDG", start: "2026-02-23T06:00:00", end: "2026-02-23T08:30:00", stayLabel: "STAYING CDG 🇫🇷" },
+      { id: "TG931", from: "CDG", to: "BKK", start: "2026-02-28T12:00:00", end: "2026-03-01T06:00:00", stayLabel: "STAYING BKK (12H LAYOVER) 🇹🇭" },
+      { id: "TG636", from: "BKK", to: "TPE", start: "2026-03-01T17:00:00", end: "2026-03-01T22:10:00", stayLabel: "LANDED TPE 🇹🇼" }
     ];
 
     const CONFIG = { sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXXXXXXXX/pub?output=csv" };
@@ -151,17 +137,15 @@
 
     function runClock() {
       const now = fakeTime || new Date();
-      const departure = new Date(FLIGHT_PLAN[0].start);
-      const diff = departure - now;
-
-      if (diff <= 0) {
-        document.getElementById('statusText').innerText = "Departure Gate Open";
-        document.getElementById('statusDesc').innerText = "航班已就緒，請 Addie 登機追蹤。";
+      const dep = new Date(FLIGHT_PLAN[0].start);
+      if (dep - now <= 0) {
+        document.getElementById('statusText').innerText = "Radar Active";
         document.getElementById('checkinTimer').style.display = 'none';
         document.getElementById('finalEntryBtn').style.display = 'inline-block';
       } else {
+        const diff = dep - now;
         const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-        document.getElementById('checkinTimer').innerText = `NEXT TAKE OFF: ${d}d ${h}h ${m}m ${s}s`;
+        document.getElementById('checkinTimer').innerText = `NEXT FLIGHT: ${d}d ${h}h ${m}m ${s}s`;
         setTimeout(runClock, 1000);
       }
     }
@@ -171,54 +155,46 @@
       document.getElementById('trackerUI').style.display = 'block';
       setInterval(updateRadar, 1000);
       setInterval(syncSheet, 30000);
-      syncSheet();
-      updateRadar();
+      syncSheet(); updateRadar();
     };
 
     function updateRadar() {
       const now = fakeTime || new Date();
-      let visualProgress = 0, status = "RADAR STANDBY 🇹🇼", inFlight = false;
+      let progress = 0, action = "READY FOR DEPARTURE 🇹🇼", flying = false, callsign = "";
       const step = 20;
 
       FLIGHT_PLAN.forEach((f, i) => {
-        const start = new Date(f.start), end = new Date(f.end);
-        if (now >= start && now <= end) {
-          inFlight = true;
-          status = `FLYING TO ${f.to} (${f.id}) ✈️`;
-          visualProgress = (i * step) + ((now - start) / (end - start)) * step;
-        } else if (now > end) {
+        const s = new Date(f.start), e = new Date(f.end);
+        if (now >= s && now <= e) {
+          flying = true; callsign = f.id;
+          action = `FLYING TO ${f.to} (${f.id}) ✈️`;
+          progress = (i * step) + ((now - s) / (e - s)) * step;
+        } else if (now > e) {
           document.getElementById('n' + (i + 1)).classList.add('reached');
-          visualProgress = (i + 1) * step;
-          status = `STAYING IN ${f.to} ${f.flag}`;
+          progress = (i + 1) * step;
+          action = f.stayLabel;
         } else {
           document.getElementById('n' + (i + 1)).classList.remove('reached');
         }
       });
 
-      document.getElementById('currentAction').innerText = inFlight ? "IN FLIGHT NOW" : status;
-      document.getElementById('mapFill').style.width = Math.min(visualProgress, 100) + "%";
-      document.getElementById('planeIcon').style.left = Math.min(visualProgress, 100) + "%";
+      const tag = document.getElementById('flightTag');
+      if (flying) { tag.innerText = callsign; tag.classList.add('visible'); } 
+      else { tag.classList.remove('visible'); }
+
+      document.getElementById('currentAction').innerText = action;
+      document.getElementById('mapFill').style.width = Math.min(progress, 100) + "%";
+      document.getElementById('planeContainer').style.left = Math.min(progress, 100) + "%";
       document.getElementById('n0').classList.add('reached');
     }
 
-    // Beta Functions
     function togglePanel() { const p = document.getElementById('betaPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
-    function testState(s) {
+    function testTime(t) { 
+      fakeTime = new Date(t); 
       document.getElementById('boardingPass').style.display = 'none';
       document.getElementById('airplaneScene').style.display = 'none';
-      document.getElementById('trackerUI').style.display = 'none';
-      if (s === 'PRE') { fakeTime = new Date("2026-02-10T12:00:00"); document.getElementById('airplaneScene').style.display = 'flex'; runClock(); }
-      else {
-        document.getElementById('trackerUI').style.display = 'block';
-        if (s === 'FL_LGW') fakeTime = new Date("2026-02-13T22:00:00");
-        if (s === 'STAY_LGW') fakeTime = new Date("2026-02-16T12:00:00");
-        if (s === 'STAY_BER') fakeTime = new Date("2026-02-21T12:00:00");
-        if (s === 'FL_CDG') fakeTime = new Date("2026-02-23T07:15:00");
-        if (s === 'STAY_CDG') fakeTime = new Date("2026-02-25T12:00:00");
-        if (s === 'FL_TPE') fakeTime = new Date("2026-03-01T20:00:00");
-        if (s === 'FINISH') fakeTime = new Date("2026-03-05T12:00:00");
-        updateRadar();
-      }
+      document.getElementById('trackerUI').style.display = 'block';
+      updateRadar(); 
     }
 
     async function syncSheet() {
@@ -227,7 +203,7 @@
         const data = await res.text();
         const rows = data.split("\n");
         const cols = rows[1].split(",");
-        document.getElementById('sheetStatus').innerText = cols[1] || "Liz 正在飛往歐洲的路上...";
+        document.getElementById('sheetStatus').innerText = cols[1] || "Liz 的雷達訊號正常，準備出發！";
       } catch (e) { }
     }
   </script>
