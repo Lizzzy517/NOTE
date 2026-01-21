@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Addie's Flight Radar - Premium Edition</title>
+  <title>Addie's Flight Radar - Full Photo Edition</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Orbitron:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --blue-sky: #87CEEB; --deep-blue: #1e3a8a; --gold: #d8b25c; --cloud: rgba(255,255,255,0.8);
+      --blue-sky: #87CEEB; --deep-blue: #1e3a8a; --gold: #d8b25c;
       --mono: "Orbitron", monospace; --display: "Cinzel", serif;
     }
     body { margin: 0; font-family: "Cormorant Garamond", serif; color: white; min-height: 100vh; background: linear-gradient(to bottom, var(--blue-sky), var(--deep-blue)); overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
     
-    /* 雲朵背景動畫 */
+    /* 背景雲朵 */
     .cloud { position: absolute; background: white; border-radius: 50%; opacity: 0.5; filter: blur(15px); z-index: 1; animation: float 30s infinite linear; }
     .c1 { width: 200px; height: 60px; top: 10%; left: -200px; }
     .c2 { width: 300px; height: 80px; top: 40%; left: -300px; animation-delay: 5s; }
@@ -20,7 +20,7 @@
     @keyframes float { 0% { transform: translateX(0); } 100% { transform: translateX(calc(100vw + 300px)); } }
 
     .wrap { width: min(860px, 95%); z-index: 10; position: relative; }
-    .card-container { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 25px; padding: 30px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.4); text-align: center; }
+    .card-container { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 25px; padding: 25px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.4); text-align: center; }
 
     /* Boarding Pass */
     #boardingPass { background: linear-gradient(160deg, #FDFDFD, #E8F1F8); color: #333; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 420px; margin: 0 auto; text-align: left; font-family: var(--mono); border: 1px dashed #999; }
@@ -36,34 +36,35 @@
 
     /* Radar UI */
     #trackerUI { display: none; }
-    .status-badge { display: inline-block; padding: 10px 30px; border-radius: 50px; background: var(--gold); color: #000; font-family: var(--mono); font-weight: 700; margin-bottom: 30px; box-shadow: 0 0 20px rgba(216,178,92,0.4); }
+    .status-badge { display: inline-block; padding: 10px 30px; border-radius: 50px; background: var(--gold); color: #000; font-family: var(--mono); font-weight: 700; margin-bottom: 30px; }
 
     .journey-map { position: relative; margin: 100px 0 60px 0; padding: 0 25px; }
     .map-line { height: 4px; background: rgba(255,255,255,0.2); position: relative; border-radius: 2px; }
     .map-progress { height: 100%; background: var(--gold); width: 0%; position: absolute; box-shadow: 0 0 10px var(--gold); }
     
-    /* 統一標籤設計 */
     .plane-container { position: absolute; top: -55px; transform: translateX(-50%); transition: left 0.5s linear; z-index: 15; display: flex; flex-direction: column; align-items: center; }
     .flight-tag { background: #000; color: var(--gold); font-family: var(--mono); font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--gold); margin-bottom: 6px; white-space: nowrap; box-shadow: 0 0 15px rgba(216,178,92,0.5); opacity: 0; }
     .flight-tag.visible { opacity: 1; }
-    .plane-icon { font-size: 30px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+    .plane-icon { font-size: 30px; }
 
     .node-wrap { display: flex; justify-content: space-between; position: absolute; top: -8px; left: 0; width: 100%; }
     .node { width: 20px; height: 20px; background: #fff; border-radius: 50%; border: 3px solid var(--deep-blue); position: relative; }
-    .node.reached { background: var(--gold); border-color: #fff; box-shadow: 0 0 10px var(--gold); }
+    .node.reached { background: var(--gold); border-color: #fff; }
     .node-label { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: bold; font-family: var(--mono); }
 
-    .report-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(216,178,92,0.3); border-radius: 15px; padding: 25px; margin-top: 40px; }
-    #sheetStatus { font-style: italic; color: var(--gold); font-size: 19px; }
+    /* 拍立得相框 */
+    .photo-frame { width: 100%; max-width: 250px; margin: 0 auto 20px; background: white; padding: 12px 12px 35px 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); transform: rotate(-3deg); display: none; }
+    .photo-frame img { width: 100%; height: auto; display: block; border: 1px solid #eee; }
+
+    .report-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(216,178,92,0.3); border-radius: 15px; padding: 20px; margin-top: 30px; }
+    #sheetStatus { font-style: italic; color: var(--gold); font-size: 18px; margin-top: 10px; }
 
     button { padding: 15px 40px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; font-family: var(--mono); background: var(--gold); color: #000; transition: 0.3s; }
-    button:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(216,178,92,0.5); }
-
-    /* Beta Controls */
+    
     #betaConsole { position: fixed; bottom: 10px; right: 10px; z-index: 999; }
     .beta-btn { font-size: 8px; padding: 5px; opacity: 0.3; background: #000; color: #0f0; border: 1px solid #0f0; cursor: pointer; }
     .beta-panel { display: none; background: #000; padding: 10px; border: 1px solid #0f0; border-radius: 8px; width: 220px; }
-    .beta-panel button { width: 100%; font-size: 10px; padding: 6px; margin: 2px 0; background: #111; color: #fff; border: 1px solid #333; text-align: left; }
+    .beta-panel button { width: 100%; font-size: 10px; padding: 6px; margin: 2px 0; background: #111; color: #fff; text-align: left; }
   </style>
 </head>
 <body>
@@ -88,9 +89,9 @@
 
       <div id="airplaneScene">
         <img src="https://cdn-icons-png.flaticon.com/512/984/984233.png" class="airplane-img">
-        <h2 id="statusText" style="color:var(--gold); font-family:var(--display); margin-top:25px;">Initializing Uplink</h2>
-        <div id="checkinTimer" style="font-family:var(--mono); font-size:15px; margin: 20px 0; letter-spacing:1px;"></div>
-        <button id="finalEntryBtn" style="display:none;">CONNECT TO RADAR</button>
+        <h2 id="statusText" style="color:var(--gold); font-family:var(--display); margin-top:25px;">Connecting to GPS...</h2>
+        <div id="checkinTimer" style="font-family:var(--mono); font-size:15px; margin: 20px 0;"></div>
+        <button id="finalEntryBtn" style="display:none;">ACTIVATE RADAR</button>
       </div>
 
       <div id="trackerUI">
@@ -113,42 +114,40 @@
         </div>
 
         <div class="report-box">
-          <div style="font-size:11px; text-transform:uppercase; color:var(--gold); font-family:var(--mono); margin-bottom:10px;">Message from Liz:</div>
-          <div id="sheetStatus">Waiting for data...</div>
+          <div class="photo-frame" id="photoFrame">
+            <img src="" id="livePhoto">
+          </div>
+          <div style="font-size:11px; text-transform:uppercase; color:var(--gold); font-family:var(--mono);">Status Update:</div>
+          <div id="sheetStatus">Waiting for signal...</div>
         </div>
       </div>
-
     </section>
   </main>
 
   <div id="betaConsole">
     <div class="beta-panel" id="betaPanel">
-      <div style="color:#0f0; font-size:10px; margin-bottom:5px;">TEST FLIGHT STAGES</div>
       <button onclick="testTime('2026-02-13T22:00:00')">1. TPE > LGW (SQ312)</button>
-      <button onclick="testTime('2026-02-16T12:00:00')">2. STAYING UK 🇬🇧</button>
       <button onclick="testTime('2026-02-19T11:45:00')">3. LGW > BER (FR147)</button>
-      <button onclick="testTime('2026-02-21T12:00:00')">4. STAYING BER 🇩🇪</button>
-      <button onclick="testTime('2026-02-23T07:15:00')">5. BER > CDG (EJU5147)</button>
-      <button onclick="testTime('2026-02-25T12:00:00')">6. STAYING CDG 🇫🇷</button>
-      <button onclick="testTime('2026-02-28T18:00:00')">7. CDG > BKK (TG931)</button>
-      <button onclick="testTime('2026-03-01T10:00:00')">8. BKK LAYOVER (12H)</button>
-      <button onclick="testTime('2026-03-01T20:00:00')">9. BKK > TPE (TG636)</button>
-      <button onclick="testTime('2026-03-02T12:00:00')">10. LANDED TPE 🏠</button>
+      <button onclick="testTime('2026-03-01T10:00:00')">8. BKK LAYOVER</button>
       <button onclick="togglePanel()" style="background:#400; text-align:center;">CLOSE</button>
     </div>
-    <div class="beta-btn" onclick="togglePanel()">BETA MODE</div>
+    <div class="beta-btn" onclick="togglePanel()">BETA</div>
   </div>
 
   <script>
+    // 請在這裡填入妳發布的 CSV 網址
+    const CONFIG = { 
+      sheetUrl: "這裡貼上妳的CSV網址" 
+    };
+
     const FLIGHT_PLAN = [
       { id: "SQ312", from: "TPE", to: "LGW", start: "2026-02-13T17:35:00", end: "2026-02-14T06:35:00", stayLabel: "STAYING UK 🇬🇧" },
       { id: "FR147", from: "LGW", to: "BER", start: "2026-02-19T10:00:00", end: "2026-02-19T13:35:00", stayLabel: "STAYING BER 🇩🇪" },
       { id: "EJU5147", from: "BER", to: "CDG", start: "2026-02-23T06:00:00", end: "2026-02-23T08:30:00", stayLabel: "STAYING CDG 🇫🇷" },
       { id: "TG931", from: "CDG", to: "BKK", start: "2026-02-28T12:00:00", end: "2026-03-01T06:00:00", stayLabel: "STAYING BKK (12H LAYOVER) 🇹🇭" },
-      { id: "TG636", from: "BKK", to: "TPE", start: "2026-03-01T17:00:00", end: "2026-03-01T22:10:00", stayLabel: "LANDED TPE 🇹🇼" }
+      { id: "TG636", from: "BKK", to: "TPE", start: "2026-03-01T17:00:00", end: "2026-03-01T22:10:00", stayLabel: "LANDED TPE 🏠" }
     ];
 
-    const CONFIG = { sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXXXXXXXX/pub?output=csv" };
     let fakeTime = null;
 
     document.getElementById('startBtn').onclick = () => {
@@ -176,27 +175,25 @@
       document.getElementById('airplaneScene').style.display = 'none';
       document.getElementById('trackerUI').style.display = 'block';
       setInterval(updateRadar, 1000);
-      setInterval(syncSheet, 30000);
+      setInterval(syncSheet, 15000);
       syncSheet(); updateRadar();
     };
 
     function updateRadar() {
       const now = fakeTime || new Date();
-      let progress = 0, action = "READY FOR TAKE OFF", flying = false, callsign = "";
+      let progress = 0, action = "READY FOR DEPARTURE", flying = false, callsign = "";
       const step = 20;
 
       FLIGHT_PLAN.forEach((f, i) => {
         const s = new Date(f.start), e = new Date(f.end);
         if (now >= s && now <= e) {
           flying = true; callsign = f.id;
-          action = `FLYING TO ${f.to} ✈️`; // 這裡簡化了，航班號移到飛機標籤
+          action = `FLYING TO ${f.to} ✈️`;
           progress = (i * step) + ((now - s) / (e - s)) * step;
         } else if (now > e) {
           document.getElementById('n' + (i + 1)).classList.add('reached');
           progress = (i + 1) * step;
           action = f.stayLabel;
-        } else {
-          document.getElementById('n' + (i + 1)).classList.remove('reached');
         }
       });
 
@@ -210,6 +207,27 @@
       document.getElementById('n0').classList.add('reached');
     }
 
+    async function syncSheet() {
+      try {
+        const res = await fetch(CONFIG.sheetUrl + "&t=" + Date.now());
+        const data = await res.text();
+        const rows = data.split("\n");
+        const cols = rows[1].split(","); 
+        
+        document.getElementById('sheetStatus').innerText = cols[1] || "衛星訊號正常。";
+        
+        const photoUrl = cols[2];
+        const frame = document.getElementById('photoFrame');
+        const img = document.getElementById('livePhoto');
+        if (photoUrl && photoUrl.trim().length > 10) {
+          img.src = photoUrl.trim();
+          frame.style.display = 'block';
+        } else {
+          frame.style.display = 'none';
+        }
+      } catch (e) { }
+    }
+
     function togglePanel() { const p = document.getElementById('betaPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
     function testTime(t) { 
       fakeTime = new Date(t); 
@@ -217,16 +235,6 @@
       document.getElementById('airplaneScene').style.display = 'none';
       document.getElementById('trackerUI').style.display = 'block';
       updateRadar(); 
-    }
-
-    async function syncSheet() {
-      try {
-        const res = await fetch(CONFIG.sheetUrl + "&t=" + Date.now());
-        const data = await res.text();
-        const rows = data.split("\n");
-        const cols = rows[1].split(",");
-        document.getElementById('sheetStatus').innerText = cols[1] || "衛星連線中...";
-      } catch (e) { }
     }
   </script>
 </body>
