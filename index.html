@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Addie's Flight Radar - Precision 10 Nodes</title>
+  <title>Addie's Flight Radar - Precision Final</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Orbitron:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -22,22 +22,23 @@
     .wrap { width: min(860px, 95%); z-index: 10; position: relative; }
     .card-container { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 25px; padding: 25px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.4); text-align: center; }
 
-    /* Boarding Pass */
+    /* Boarding Pass 開場 */
     #boardingPass { background: linear-gradient(160deg, #FDFDFD, #E8F1F8); color: #333; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 420px; margin: 0 auto; text-align: left; font-family: var(--mono); border: 1px dashed #999; }
     .bp-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--deep-blue); margin-bottom: 20px; padding-bottom: 10px; }
     .bp-field { font-size: 10px; color: #777; margin-bottom: 15px; }
     .bp-field span { display: block; font-size: 18px; font-weight: bold; color: #111; }
     .barcode { width: 100%; height: 50px; background: repeating-linear-gradient(90deg, #000 0 2px, #fff 2px 5px); margin-top: 20px; opacity: 0.8; }
 
+    /* Scene Transitions */
     #airplaneScene { display: none; flex-direction: column; align-items: center; }
     .airplane-img { width: 100px; animation: flyPlane 4s infinite ease-in-out; }
     @keyframes flyPlane { 0%, 100% { transform: translateY(0) rotate(5deg); } 50% { transform: translateY(-15px) rotate(2deg); } }
 
     /* Radar UI */
     #trackerUI { display: none; }
-    .status-badge { display: inline-block; padding: 10px 30px; border-radius: 50px; background: var(--gold); color: #000; font-family: var(--mono); font-weight: 700; margin-bottom: 30px; }
+    .status-badge { display: inline-block; padding: 10px 30px; border-radius: 50px; background: var(--gold); color: #000; font-family: var(--mono); font-weight: 700; margin-bottom: 30px; box-shadow: 0 0 20px rgba(216,178,92,0.4); }
 
-    /* 進度條地圖 */
+    /* 航線地圖：保持節點等距 */
     .journey-map { position: relative; margin: 100px 0 60px 0; padding: 0 25px; }
     .map-line { height: 4px; background: rgba(255,255,255,0.2); position: relative; border-radius: 2px; }
     .map-progress { height: 100%; background: var(--gold); width: 0%; position: absolute; box-shadow: 0 0 10px var(--gold); transition: width 0.5s linear; }
@@ -45,15 +46,14 @@
     .plane-container { position: absolute; top: -55px; transform: translateX(-50%); transition: left 0.5s linear; z-index: 15; display: flex; flex-direction: column; align-items: center; }
     .flight-tag { background: #000; color: var(--gold); font-family: var(--mono); font-size: 11px; font-weight: bold; padding: 3px 10px; border-radius: 4px; border: 1px solid var(--gold); margin-bottom: 6px; white-space: nowrap; box-shadow: 0 0 15px rgba(216,178,92,0.5); opacity: 0; }
     .flight-tag.visible { opacity: 1; }
-    .plane-icon { font-size: 30px; }
+    .plane-icon { font-size: 30px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
 
-    /* 節點位置將由 JS 動態決定比例 */
-    .node-wrap { position: absolute; top: -8px; left: 0; width: 100%; height: 20px; pointer-events: none; }
-    .node { position: absolute; width: 18px; height: 18px; background: #fff; border-radius: 50%; border: 3px solid var(--deep-blue); transform: translateX(-50%); }
-    .node.reached { background: var(--gold); border-color: #fff; }
-    .node-label { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: bold; font-family: var(--mono); color: #fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+    .node-wrap { display: flex; justify-content: space-between; position: absolute; top: -8px; left: 0; width: 100%; }
+    .node { width: 18px; height: 18px; background: #fff; border-radius: 50%; border: 3px solid var(--deep-blue); position: relative; }
+    .node.reached { background: var(--gold); border-color: #fff; box-shadow: 0 0 10px var(--gold); }
+    .node-label { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: bold; font-family: var(--mono); }
 
-    /* 拍立得 */
+    /* 拍立得照片 */
     .photo-frame { width: 100%; max-width: 250px; margin: 0 auto 20px; background: white; padding: 12px 12px 35px 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); transform: rotate(-3deg); display: none; }
     .photo-frame img { width: 100%; height: auto; display: block; border: 1px solid #eee; }
 
@@ -90,7 +90,7 @@
 
       <div id="airplaneScene">
         <img src="https://cdn-icons-png.flaticon.com/512/984/984233.png" class="airplane-img">
-        <h2 id="statusText" style="color:var(--gold); font-family:var(--display); margin-top:25px;">Syncing Flight Path...</h2>
+        <h2 id="statusText" style="color:var(--gold); font-family:var(--display); margin-top:25px;">Signal Syncing</h2>
         <div id="checkinTimer" style="font-family:var(--mono); font-size:15px; margin: 20px 0;"></div>
         <button id="finalEntryBtn" style="display:none;">ACTIVATE RADAR</button>
       </div>
@@ -104,16 +104,22 @@
             <div class="plane-icon">✈️</div>
           </div>
           <div class="map-line"><div class="map-progress" id="mapFill"></div></div>
-          <div class="node-wrap" id="nodesContainer">
-            </div>
+          <div class="node-wrap">
+            <div class="node" id="n0"><span class="node-label">TPE</span></div>
+            <div class="node" id="n1"><span class="node-label">LGW</span></div>
+            <div class="node" id="n2"><span class="node-label">BER</span></div>
+            <div class="node" id="n3"><span class="node-label">CDG</span></div>
+            <div class="node" id="n4"><span class="node-label">BKK</span></div>
+            <div class="node" id="n5"><span class="node-label">TPE</span></div>
+          </div>
         </div>
 
         <div class="report-box">
           <div class="photo-frame" id="photoFrame">
             <img src="" id="livePhoto">
           </div>
-          <div style="font-size:11px; text-transform:uppercase; color:var(--gold); font-family:var(--mono);">Status Update:</div>
-          <div id="sheetStatus">Waiting for GPS signal...</div>
+          <div style="font-size:11px; text-transform:uppercase; color:var(--gold); font-family:var(--mono);">Message from Liz:</div>
+          <div id="sheetStatus">Waiting for data...</div>
         </div>
       </div>
     </section>
@@ -121,50 +127,35 @@
 
   <div id="betaConsole">
     <div class="beta-panel" id="betaPanel">
-      <div style="color:#0f0; font-size:10px; margin-bottom:5px;">TEST FLIGHT STAGES</div>
-      <button onclick="testTime('2026-02-13T22:00:00')">1. TPE ➔ LGW (SQ312)</button>
-      <button onclick="testTime('2026-02-16T12:00:00')">2. STAYING UK 🇬🇧</button>
-      <button onclick="testTime('2026-02-19T11:45:00')">3. LGW ➔ BER (FR147)</button>
-      <button onclick="testTime('2026-02-21T12:00:00')">4. STAYING BER 🇩🇪</button>
-      <button onclick="testTime('2026-02-23T07:15:00')">5. BER ➔ CDG (EJU5147)</button>
-      <button onclick="testTime('2026-02-25T12:00:00')">6. STAYING CDG 🇫🇷</button>
-      <button onclick="testTime('2026-02-28T18:00:00')">7. CDG ➔ BKK (TG931)</button>
-      <button onclick="testTime('2026-03-01T10:00:00')">8. STAYING BKK (12H) 🇹🇭</button>
-      <button onclick="testTime('2026-03-01T20:00:00')">9. BKK ➔ TPE (TG636)</button>
-      <button onclick="testTime('2026-03-02T12:00:00')">10. LANDED TPE 🏠</button>
+      <div style="color:#0f0; font-size:10px; margin-bottom:5px;">TEST 10 JOURNEY NODES</div>
+      <button onclick="testTime('2026-02-13T22:00:00')">1. ✈️ TPE ➔ LGW (SQ312)</button>
+      <button onclick="testTime('2026-02-16T12:00:00')">2. 🇬🇧 STAYING UK</button>
+      <button onclick="testTime('2026-02-19T11:45:00')">3. ✈️ LGW ➔ BER (FR147)</button>
+      <button onclick="testTime('2026-02-21T12:00:00')">4. 🇩🇪 STAYING BER</button>
+      <button onclick="testTime('2026-02-23T07:15:00')">5. ✈️ BER ➔ CDG (EJU5147)</button>
+      <button onclick="testTime('2026-02-25T12:00:00')">6. 🇫🇷 STAYING CDG</button>
+      <button onclick="testTime('2026-02-28T22:00:00')">7. ✈️ CDG ➔ BKK (TG931)</button>
+      <button onclick="testTime('2026-03-01T10:00:00')">8. 🇹🇭 STAYING BKK (12H)</button>
+      <button onclick="testTime('2026-03-01T20:00:00')">9. ✈️ BKK ➔ TPE (TG636)</button>
+      <button onclick="testTime('2026-03-02T12:00:00')">10. 🏠 LANDED TPE</button>
       <button onclick="togglePanel()" style="background:#400; text-align:center;">CLOSE</button>
     </div>
     <div class="beta-btn" onclick="togglePanel()">BETA</div>
   </div>
 
   <script>
+    // 💡 記得替換成妳的 Google Sheet CSV 連結
     const CONFIG = { sheetUrl: "這裡貼上妳的CSV網址" };
 
-    // 設定每個節點在進度條上的「百分比位置」，針對長途飛行拉開間距
-    // 0:TPE, 20:LGW, 35:BER, 50:CDG, 85:BKK, 100:TPE (CDG到BKK現在佔了35%的長度)
-    const NODE_POSITIONS = [0, 20, 35, 50, 85, 100];
-    const NODE_LABELS = ["TPE", "LGW", "BER", "CDG", "BKK", "TPE"];
-
     const FLIGHT_PLAN = [
-      { id: "SQ312", start: "2026-02-13T17:35:00", end: "2026-02-14T06:35:00", stayLabel: "STAYING UK 🇬🇧", pIdx: 0 },
-      { id: "FR147", start: "2026-02-19T10:00:00", end: "2026-02-19T13:35:00", stayLabel: "STAYING BER 🇩🇪", pIdx: 1 },
-      { id: "EJU5147", start: "2026-02-23T06:00:00", end: "2026-02-23T08:30:00", stayLabel: "STAYING CDG 🇫🇷", pIdx: 2 },
-      { id: "TG931", start: "2026-02-28T12:00:00", end: "2026-03-01T06:00:00", stayLabel: "STAYING BKK (12H LAYOVER) 🇹🇭", pIdx: 3 },
-      { id: "TG636", start: "2026-03-01T17:00:00", end: "2026-03-01T22:10:00", stayLabel: "LANDED TPE 🏠", pIdx: 4 }
+      { id: "SQ312", from: "TPE", to: "LGW", start: "2026-02-13T17:35:00", end: "2026-02-14T06:35:00", stayLabel: "STAYING UK 🇬🇧" },
+      { id: "FR147", from: "LGW", to: "BER", start: "2026-02-19T10:00:00", end: "2026-02-19T13:35:00", stayLabel: "STAYING BER 🇩🇪" },
+      { id: "EJU5147", from: "BER", to: "CDG", start: "2026-02-23T06:00:00", end: "2026-02-23T08:30:00", stayLabel: "STAYING CDG 🇫🇷" },
+      { id: "TG931", from: "CDG", to: "BKK", start: "2026-02-28T12:00:00", end: "2026-03-01T06:00:00", stayLabel: "STAYING BKK (12H LAYOVER) 🇹🇭" },
+      { id: "TG636", from: "BKK", to: "TPE", start: "2026-03-01T17:00:00", end: "2026-03-01T22:10:00", stayLabel: "LANDED TPE 🏠" }
     ];
 
     let fakeTime = null;
-
-    // 初始化生成節點
-    const container = document.getElementById('nodesContainer');
-    NODE_POSITIONS.forEach((pos, i) => {
-      const node = document.createElement('div');
-      node.className = 'node';
-      node.id = `n${i}`;
-      node.style.left = `${pos}%`;
-      node.innerHTML = `<span class="node-label">${NODE_LABELS[i]}</span>`;
-      container.appendChild(node);
-    });
 
     document.getElementById('startBtn').onclick = () => {
       document.getElementById('boardingPass').style.display = 'none';
@@ -198,20 +189,26 @@
     function updateRadar() {
       const now = fakeTime || new Date();
       let progress = 0, action = "READY FOR DEPARTURE", flying = false, callsign = "";
+      const step = 20; // 5 個航段，每個佔 20%
 
       FLIGHT_PLAN.forEach((f, i) => {
         const s = new Date(f.start), e = new Date(f.end);
-        const startP = NODE_POSITIONS[f.pIdx];
-        const endP = NODE_POSITIONS[f.pIdx + 1];
-
         if (now >= s && now <= e) {
           flying = true; callsign = f.id;
-          action = `FLYING TO ${NODE_LABELS[f.pIdx+1]} ✈️`;
-          const ratio = (now - s) / (e - s);
-          progress = startP + (ratio * (endP - startP));
+          action = `FLYING TO ${f.to} ✈️`;
+          
+          let ratio = (now - s) / (e - s);
+
+          // ✨ 優化：針對長途段 (CDG->BKK 是第 4 段，索引 i=3)，讓飛機視覺上更置中
+          if (i === 3) {
+            // 使用補償係數，讓飛機起飛後更快移向中心點，而不是卡在 CDG
+            ratio = Math.pow(ratio, 0.6); 
+          }
+
+          progress = (i * step) + (ratio * step);
         } else if (now > e) {
           document.getElementById('n' + (i + 1)).classList.add('reached');
-          progress = endP;
+          progress = (i + 1) * step;
           action = f.stayLabel;
         } else {
           document.getElementById('n' + (i + 1)).classList.remove('reached');
@@ -234,7 +231,7 @@
         const data = await res.text();
         const rows = data.split("\n");
         const cols = rows[1].split(","); 
-        document.getElementById('sheetStatus').innerText = cols[1] || "衛星連線中...";
+        document.getElementById('sheetStatus').innerText = cols[1] || "Liz 的衛星訊號正常";
         const photoUrl = cols[2];
         const frame = document.getElementById('photoFrame');
         const img = document.getElementById('livePhoto');
