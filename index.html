@@ -186,34 +186,56 @@
       syncSheet(); updateRadar();
     };
 
-    function updateRadar() {
+   function updateRadar() {
       const now = fakeTime || new Date();
       let progress = 0, action = "READY FOR DEPARTURE", flying = false, callsign = "";
-      const step = 20; // 5 個航段，每個佔 20%
+
+      // --- 調整後的視覺節點座標 (讓 CDG 到 BKK 空間變大) ---
+      // 0:TPE, 20:LGW, 40:BER, 60:CDG, 90:BKK, 100:TPE
+      const nodeStyles = [0, 20, 40, 60, 90, 100];
+      const labels = ["TPE", "LGW", "BER", "CDG", "BKK", "TPE"];
+      
+      // 先更新圓點的視覺位置
+      nodeStyles.forEach((pos, idx) => {
+        const n = document.getElementById('n' + idx);
+        if(n) n.style.left = pos + "%";
+      });
 
       FLIGHT_PLAN.forEach((f, i) => {
         const s = new Date(f.start), e = new Date(f.end);
+        const startP = nodeStyles[i];
+        const endP = nodeStyles[i+1];
+
         if (now >= s && now <= e) {
           flying = true; callsign = f.id;
-          action = `FLYING TO ${f.to} ✈️`;
+          action = `FLYING TO ${labels[i+1]} ✈️`;
           
           let ratio = (now - s) / (e - s);
-
-          // ✨ 優化：針對長途段 (CDG->BKK 是第 4 段，索引 i=3)，讓飛機視覺上更置中
+          
+          // 針對 CDG -> BKK (i=3) 額外補強置中感
           if (i === 3) {
-            // 使用補償係數，讓飛機起飛後更快移向中心點，而不是卡在 CDG
-            ratio = Math.pow(ratio, 0.6); 
+            ratio = Math.pow(ratio, 0.5); 
           }
 
-          progress = (i * step) + (ratio * step);
+          progress = startP + (ratio * (endP - startP));
         } else if (now > e) {
           document.getElementById('n' + (i + 1)).classList.add('reached');
-          progress = (i + 1) * step;
+          progress = endP;
           action = f.stayLabel;
         } else {
           document.getElementById('n' + (i + 1)).classList.remove('reached');
         }
       });
+
+      const tag = document.getElementById('flightTag');
+      if (flying) { tag.innerText = callsign; tag.classList.add('visible'); } 
+      else { tag.classList.remove('visible'); }
+
+      document.getElementById('currentAction').innerText = action;
+      document.getElementById('mapFill').style.width = Math.min(progress, 100) + "%";
+      document.getElementById('planeContainer').style.left = Math.min(progress, 100) + "%";
+      document.getElementById('n0').classList.add('reached');
+    }
 
       const tag = document.getElementById('flightTag');
       if (flying) { tag.innerText = callsign; tag.classList.add('visible'); } 
@@ -292,4 +314,5 @@
   </script>
 </body>
 </html>
+
 
