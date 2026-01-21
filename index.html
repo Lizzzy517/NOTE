@@ -3,252 +3,177 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Your Journey Awaits, Addie!</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Cormorant+Garamond:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <title>Addie's Flight Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Orbitron:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --blue-sky-light: #87CEEB; --blue-sky-dark: #6495ED; --cloud-white: #F0F8FF;
-      --text: rgba(255,255,255,.92); --gold: #d8b25c; --radius: 22px;
-      --display: "Cinzel", serif; --mono: "Orbitron", monospace;
+      --blue-sky: #87CEEB; --deep-blue: #1e3a8a; --gold: #d8b25c; --cloud: #f0f8ff;
+      --mono: "Orbitron", monospace; --display: "Cinzel", serif;
     }
-    body { margin: 0; font-family: "Cormorant Garamond", serif; color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(to bottom right, var(--blue-sky-light), var(--blue-sky-dark)); overflow-x: hidden; position: relative; }
+    body { margin: 0; font-family: "Cormorant Garamond", serif; color: white; min-height: 100vh; background: linear-gradient(to bottom, var(--blue-sky), var(--deep-blue)); overflow-x: hidden; display: flex; justify-content: center; align-items: center; }
     
-    /* 雲朵動畫 */
-    .cloud { position: absolute; background: var(--cloud-white); border-radius: 50%; opacity: 0.8; filter: blur(8px); z-index: 1; }
-    .cloud:nth-child(1) { width: 120px; height: 70px; top: 10%; left: 15%; animation: floatCloud 25s infinite linear; }
-    .cloud:nth-child(2) { width: 180px; height: 90px; top: 25%; right: 10%; animation: floatCloud 30s infinite linear reverse; }
-    @keyframes floatCloud { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(30px); } }
+    /* 雲朵背景 */
+    .cloud { position: absolute; background: white; border-radius: 50%; opacity: 0.6; filter: blur(10px); z-index: 1; animation: float 20s infinite linear; }
+    @keyframes float { 0% { transform: translateX(-100px); } 100% { transform: translateX(100vw); } }
 
-    .wrap { width: min(860px, 95%); position: relative; z-index: 10; }
-    .card-container { background: rgba(255,255,255,0.1); border-radius: var(--radius); padding: 28px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 15px 40px rgba(0,0,0,0.3); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); text-align: center; }
-
-    /* Boarding Pass */
-    #boardingPass { background: linear-gradient(160deg, #F0F8FF, #E0EBF5); color: #333; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); max-width: 400px; margin: 0 auto; text-align: left; font-family: var(--mono); border: 1px dashed rgba(0,0,0,0.1); }
-    .bp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px; }
-    .bp-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-    .bp-field { font-size: 10px; color: #666; }
-    .bp-field span { display: block; font-size: 15px; font-weight: bold; color: #000; }
-    .barcode { width: 100%; height: 40px; background: repeating-linear-gradient(90deg, #000 0 2px, #fff 2px 4px); margin-top: 15px; }
+    .container { width: min(800px, 90%); z-index: 10; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-radius: 25px; padding: 30px; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
     
-    /* Airplane Scene */
-    #airplaneScene { display: none; flex-direction: column; align-items: center; padding: 20px; }
-    .airplane { width: 100px; animation: flyPlane 4s infinite ease-in-out; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); }
-    @keyframes flyPlane { 0%, 100% { transform: translateY(0) rotate(5deg); } 50% { transform: translateY(-15px) rotate(3deg); } }
-    .checkin-status { font-family: var(--display); font-size: 24px; color: var(--gold); margin: 20px 0 10px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+    /* 登機證風格 */
+    .boarding-card { background: white; color: #333; border-radius: 15px; padding: 20px; margin-bottom: 25px; font-family: var(--mono); position: relative; overflow: hidden; }
+    .bp-row { display: flex; justify-content: space-between; margin: 10px 0; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+    .bp-label { font-size: 10px; color: #888; text-transform: uppercase; }
+    .bp-value { font-size: 14px; font-weight: 700; color: #222; }
 
-    /* Main Flow */
-    #flow { display: none; }
-    .countdown { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
-    .tile { background: rgba(255,255,255,0.15); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); }
-    .num { font-family: var(--mono); font-size: 20px; font-weight: bold; display: block; }
-    .label { font-size: 10px; color: var(--gold); }
-    .journey-wrap { margin: 20px 0; }
-    .progress-bar { width: 100%; height: 10px; background: rgba(0,0,0,0.2); border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #f9d98e); width: 0%; transition: width 2s; }
+    /* 飛行狀態指示器 */
+    .status-badge { display: inline-block; padding: 8px 20px; border-radius: 50px; background: var(--gold); color: #000; font-family: var(--mono); font-weight: 700; margin-bottom: 20px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(216,178,92, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(216,178,92, 0); } 100% { box-shadow: 0 0 0 0 rgba(216,178,92, 0); } }
 
-    /* Cards */
-    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; perspective: 1000px; }
-    .fate { height: 180px; cursor: pointer; }
-    .fateInner { position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d; }
-    .fate.revealed .fateInner { transform: rotateY(180deg); }
-    .fateFace { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 15px; border: 1px solid rgba(216,178,92,0.3); padding: 15px; display: flex; flex-direction: column; justify-content: center; background: rgba(15, 15, 25, 0.9); }
-    .fateBack { transform: rotateY(180deg); background: rgba(25, 20, 45, 0.95); }
-    #cardC { grid-column: 1 / -1; display: none; opacity: 0; transition: 1s; padding: 20px; border: 2px solid var(--gold); border-radius: 15px; background: rgba(216,178,92,0.1); margin-top: 20px; }
-    #cardC.show { display: block; opacity: 1; }
-    .receipt-img { width: 100%; border-radius: 5px; margin-top: 10px; border: 1px solid var(--gold); }
+    /* 航線進度條 */
+    .journey-map { position: relative; margin: 40px 0; padding: 0 20px; }
+    .map-line { height: 4px; background: rgba(255,255,255,0.3); position: relative; border-radius: 2px; }
+    .map-progress { height: 100%; background: var(--gold); width: 0%; position: absolute; transition: width 1s; }
+    .node-wrap { display: flex; justify-content: space-between; position: absolute; top: -8px; left: 0; width: 100%; }
+    .node { width: 20px; height: 20px; background: #fff; border-radius: 50%; border: 3px solid var(--deep-blue); position: relative; }
+    .node.reached { background: var(--gold); }
+    .node-label { position: absolute; top: 25px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: bold; white-space: nowrap; font-family: var(--mono); }
 
-    button { padding: 12px 24px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; font-family: var(--mono); transition: 0.3s; }
-    .primary { background: linear-gradient(45deg, var(--gold), #f9d98e); color: #333; }
-    .primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-    @media (max-width: 500px) { .cards { grid-template-columns: 1fr; } }
+    /* Google Sheet 回報區 */
+    .report-box { background: rgba(255,255,255,0.1); border: 1px solid var(--gold); border-radius: 15px; padding: 20px; margin-top: 20px; }
+    #sheetStatus { font-style: italic; color: var(--gold); font-size: 18px; margin-top: 10px; }
+
+    .plane-icon { position: absolute; top: -30px; font-size: 24px; transform: translateX(-50%); transition: left 1s; z-index: 15; }
+    
+    button { background: var(--gold); border: none; padding: 12px 30px; border-radius: 10px; font-family: var(--mono); font-weight: bold; cursor: pointer; margin-top: 20px; }
   </style>
 </head>
 <body>
+
+<div id="startScreen" style="z-index: 100; text-align: center;">
+  <h1 style="font-family: var(--display); color: var(--gold);">Hey Addie!</h1>
+  <p>妳準備好追蹤我的 2026 歐洲航線了嗎？</p>
+  <button onclick="initApp()">START TRACKING</button>
+</div>
+
+<div id="mainApp" class="container" style="display:none;">
+  <div class="status-badge" id="currentAction">WAITING FOR DEPARTURE</div>
   
-  <div class="cloud"></div><div class="cloud"></div>
+  <div class="boarding-card">
+    <div style="font-size: 18px; border-bottom: 2px solid #333; margin-bottom: 10px;">FLIGHT TRACKER</div>
+    <div class="bp-row">
+      <div><div class="bp-label">Passenger</div><div class="bp-value">ADDIE</div></div>
+      <div><div class="bp-label">Pilot</div><div class="bp-value">LIZ</div></div>
+    </div>
+    <div class="bp-row">
+      <div><div class="bp-label">Next Destination</div><div class="bp-value" id="nextDest">London (LGW)</div></div>
+      <div><div class="bp-label">Local Time</div><div class="bp-value" id="localClock">00:00:00</div></div>
+    </div>
+  </div>
 
-  <main class="wrap">
-    <section class="card-container">
-      
-      <div id="boardingPass">
-        <div class="bp-header"><h2>BOARDING PASS</h2><span>✈️</span></div>
-        <div class="bp-info">
-          <div class="bp-field">PASSENGER<span>ADDIE</span></div>
-          <div class="bp-field">DATE<span>MAR 06, 2026</span></div>
-          <div class="bp-field">FROM<span>TAIWAN (TPE)</span></div>
-          <div class="bp-field">TO<span>EUROPE (???)</span></div>
-        </div>
-        <div class="barcode"></div>
-        <div style="text-align:center; margin-top:20px;">
-          <button class="primary" id="startBtn">START JOURNEY</button>
-        </div>
-      </div>
+  <div class="journey-map">
+    <div class="plane-icon" id="planeIcon">✈️</div>
+    <div class="map-line">
+      <div class="map-progress" id="mapFill"></div>
+    </div>
+    <div class="node-wrap">
+      <div class="node" id="n0"><span class="node-label">TPE</span></div>
+      <div class="node" id="n1"><span class="node-label">LGW</span></div>
+      <div class="node" id="n2"><span class="node-label">BER</span></div>
+      <div class="node" id="n3"><span class="node-label">CDG</span></div>
+      <div class="node" id="n4"><span class="node-label">BKK</span></div>
+      <div class="node" id="n5"><span class="node-label">TPE</span></div>
+    </div>
+  </div>
 
-      <div id="airplaneScene">
-        <img src="https://cdn-icons-png.flaticon.com/512/984/984233.png" class="airplane">
-        <h2 class="checkin-status" id="statusText">尚未開放 Check-in</h2>
-        <p id="statusDesc" style="font-size:14px; color:rgba(255,255,255,0.8); margin-bottom:20px;">
-          飛行員正在確認航線，請稍候。
-        </p>
-        <div id="checkinTimer" style="font-family:var(--mono); font-size:14px; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;"></div>
-        <button class="primary" id="finalEntryBtn" style="display:none; margin-top:20px;">立即登機！</button>
-      </div>
+  <div class="report-box">
+    <div class="bp-label" style="color:var(--gold)">Live from Liz:</div>
+    <div id="sheetStatus">正在讀取衛星回報...</div>
+  </div>
 
-      <div id="flow">
-        <h2 style="font-family:var(--display); color:var(--gold); margin-bottom:5px;">Hi, Addie!</h2>
-        <div class="countdown">
-          <div class="tile"><span class="num" id="d">0</span><span class="label">DAYS</span></div>
-          <div class="tile"><span class="num" id="h">0</span><span class="label">HRS</span></div>
-          <div class="tile"><span class="num" id="m">0</span><span class="label">MINS</span></div>
-          <div class="tile"><span class="num" id="s">0</span><span class="label">SECS</span></div>
-        </div>
-        <div class="journey-wrap">
-          <div style="font-family:var(--mono); font-size:10px; color:var(--gold); margin-bottom:5px;">EUROPE QUEST: <span id="percentText">0</span>%</div>
-          <div class="progress-bar"><div class="progress-fill" id="barFill"></div></div>
-          <p id="travelStatus" style="font-size:12px; font-style:italic; margin-top:8px;"></p>
-        </div>
-        <p id="openingText" style="font-size:15px; font-style:italic; margin:20px 0;"></p>
-        <div class="cards">
-          <div class="fate" id="cardA" onclick="handlePick('A')">
-            <div class="fateInner">
-              <div class="fateFace">Card A<br><small style="color:var(--gold)">tap to pick</small></div>
-              <div class="fateFace fateBack">
-                <div style="font-family:var(--display); color:var(--gold);">A CUT · 國賓</div>
-                <div id="metaA" style="font-size:12px; margin-top:10px;"></div>
-                <a id="linkA" target="_blank" style="color:var(--gold); font-size:11px; margin-top:10px;">View Map</a>
-              </div>
-            </div>
-          </div>
-          <div class="fate" id="cardB" onclick="handlePick('B')">
-            <div class="fateInner">
-              <div class="fateFace">Card B<br><small style="color:var(--gold)">tap to pick</small></div>
-              <div class="fateFace fateBack">
-                <div style="font-family:var(--display); color:var(--gold);">漢來飯店一晚</div>
-                <div id="metaB" style="font-size:12px; margin-top:10px;"></div>
-                <a id="linkB" target="_blank" style="color:var(--gold); font-size:11px; margin-top:10px;">View Map</a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="cardC">
-          <div style="font-family:var(--display); color:var(--gold); font-size:18px;">Actually... 🎁</div>
-          <p id="metaC" style="font-size:13px;"></p>
-          <div style="display:flex; gap:10px;">
-            <img src="" id="imgA" class="receipt-img">
-            <img src="" id="imgB" class="receipt-img">
-          </div>
-        </div>
-        <div id="stepActions" style="display:none; justify-content:center; margin-top:20px;">
-          <button class="primary" id="revealOtherBtn">看看另一個選項</button>
-        </div>
-      </div>
+  <div id="timerDisplay" style="margin-top:20px; font-family:var(--mono); font-size:12px; opacity:0.7;"></div>
+</div>
 
-    </section>
-  </main>
+<script>
+const FLIGHTS = [
+  { from: "TPE", to: "LGW", start: "2026-02-13T17:35:00", end: "2026-02-14T06:35:00" },
+  { from: "LGW", to: "BER", start: "2026-02-19T10:00:00", end: "2026-02-19T13:35:00" },
+  { from: "BER", to: "CDG", start: "2026-02-23T06:00:00", end: "2026-02-23T08:30:00" },
+  { from: "CDG", to: "BKK", start: "2026-02-28T12:00:00", end: "2026-03-01T06:00:00" },
+  { from: "BKK", to: "TPE", start: "2026-03-01T17:00:00", end: "2026-03-01T22:10:00" }
+];
 
-  <script>
-    const CONFIG = {
-      targetDate: "2026-03-06T00:00:00",
-      checkinTime: "2024-07-20T10:00:00", // 👈 修改這裡：設定妳要開放的時間
-      sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXXXXXXXX/pub?output=csv", 
-      mapA: "https://maps.app.goo.gl/9", 
-      mapB: "https://maps.app.goo.gl/10",
-      receiptA: "妳的圖片1", receiptB: "妳的圖片2",
-      textA: "2026/3/6 19:00\n只要美美地出現就好💕",
-      textB: "2026/3/7 Check-in\n隔天還有島語早餐唷！",
-      textC: "看妳在那邊選這麼久，其實我全都訂了啦！\n生日行程就是 A CUT 晚餐 + 漢來住一晚！",
-      opening: "Pick a card 🃏 Choose your fate ✨\n由命運決定你今年的生日怎麼過"
-    };
+const CONFIG = {
+  sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXXXXXXXX/pub?output=csv" // 👈 貼上妳的 CSV 連結
+};
 
-    let picked = null;
+function initApp() {
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  updateTracker();
+  setInterval(updateTracker, 1000);
+  setInterval(syncSheet, 30000);
+  syncSheet();
+}
 
-    // 1. 處理登機證點擊
-    document.getElementById('startBtn').onclick = function() {
-      document.getElementById('boardingPass').style.display = 'none';
-      document.getElementById('airplaneScene').style.display = 'flex';
-      checkTimeStatus();
-    };
+function updateTracker() {
+  const now = new Date();
+  document.getElementById('localClock').innerText = now.toLocaleTimeString();
+  
+  let currentStatus = "ENJOYING TAIWAN";
+  let progress = 0;
+  let next = "London LGW";
+  
+  // 計算總進度與目前狀態
+  const totalTripTime = new Date(FLIGHTS[4].end) - new Date(FLIGHTS[0].start);
+  const timeElapsed = now - new Date(FLIGHTS[0].start);
+  
+  if (timeElapsed > 0) {
+    progress = (timeElapsed / totalTripTime) * 100;
+  }
 
-    // 2. 檢查時間狀態
-    function checkTimeStatus() {
-      const now = new Date();
-      const openTime = new Date(CONFIG.checkinTime);
-      const diff = openTime - now;
-
-      if (diff <= 0) {
-        document.getElementById('statusText').innerText = "Check-in 已開放！";
-        document.getElementById('statusDesc').innerText = "艙門已開啟，請準備進入驚喜航線。";
-        document.getElementById('checkinTimer').style.display = 'none';
-        document.getElementById('finalEntryBtn').style.display = 'inline-block';
-      } else {
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
-        document.getElementById('checkinTimer').innerText = `距離登機還有：${d}天 ${h}時 ${m}分 ${s}秒`;
-        setTimeout(checkTimeStatus, 1000);
-      }
+  // 判斷是否在飛行中
+  let inFlight = false;
+  FLIGHTS.forEach((f, index) => {
+    const startTime = new Date(f.start);
+    const endTime = new Date(f.end);
+    if (now >= startTime && now <= endTime) {
+      inFlight = true;
+      currentStatus = `FLYING TO ${f.to} ✈️`;
+      next = f.to;
+    } else if (now > endTime) {
+      document.getElementById('n' + (index + 1)).classList.add('reached');
+      currentStatus = `EXPLORING ${f.to} 🌍`;
+      if (FLIGHTS[index+1]) next = FLIGHTS[index+1].to;
     }
+  });
 
-    // 3. 進入主畫面
-    document.getElementById('finalEntryBtn').onclick = function() {
-      document.getElementById('airplaneScene').style.display = 'none';
-      document.getElementById('flow').style.display = 'block';
-      startMainApp();
-    };
+  if (now < new Date(FLIGHTS[0].start)) {
+    currentStatus = "WAITING FOR DEPARTURE";
+    const diff = new Date(FLIGHTS[0].start) - now;
+    const d = Math.floor(diff/86400000);
+    const h = Math.floor((diff%86400000)/3600000);
+    document.getElementById('timerDisplay').innerText = `離起飛還有: ${d}天 ${h}小時`;
+  }
 
-    function startMainApp() {
-      document.getElementById("openingText").innerText = CONFIG.opening;
-      document.getElementById("linkA").href = CONFIG.mapA;
-      document.getElementById("linkB").href = CONFIG.mapB;
-      document.getElementById("imgA").src = CONFIG.receiptA;
-      document.getElementById("imgB").src = CONFIG.receiptB;
-      document.getElementById("metaA").innerText = CONFIG.textA;
-      document.getElementById("metaB").innerText = CONFIG.textB;
-      document.getElementById("metaC").innerText = CONFIG.textC;
-      setInterval(updateCountdown, 1000);
-      setInterval(syncProgress, 30000);
-      syncProgress();
-    }
+  // 更新介面
+  document.getElementById('currentAction').innerText = inFlight ? "IN FLIGHT NOW" : currentStatus;
+  document.getElementById('nextDest').innerText = next;
+  document.getElementById('mapFill').style.width = Math.min(Math.max(progress, 0), 100) + "%";
+  document.getElementById('planeIcon').style.left = Math.min(Math.max(progress, 0), 100) + "%";
+  document.getElementById('n0').classList.add('reached');
+}
 
-    async function syncProgress() {
-      try {
-        const res = await fetch(CONFIG.sheetUrl + "&t=" + Date.now());
-        const data = await res.text();
-        const rows = data.split("\n");
-        const cols = rows[1].split(",");
-        document.getElementById("barFill").style.width = cols[0] + "%";
-        document.getElementById("percentText").innerText = cols[0];
-        document.getElementById("travelStatus").innerText = "📍 " + cols[1];
-      } catch (e) { }
-    }
-
-    function updateCountdown() {
-      const diff = new Date(CONFIG.targetDate) - Date.now();
-      if (diff <= 0) return;
-      document.getElementById("d").innerText = Math.floor(diff / 86400000);
-      document.getElementById("h").innerText = Math.floor((diff % 86400000) / 3600000);
-      document.getElementById("m").innerText = Math.floor((diff % 3600000) / 60000);
-      document.getElementById("s").innerText = Math.floor((diff % 60000) / 1000);
-    }
-
-    window.handlePick = function(id) {
-      if (picked) return;
-      picked = id;
-      document.getElementById("card" + id).classList.add("revealed");
-      document.getElementById("stepActions").style.display = "flex";
-    };
-
-    document.getElementById("revealOtherBtn").onclick = () => {
-      const otherId = (picked === 'A') ? 'cardB' : 'cardA';
-      document.getElementById(otherId).classList.add("revealed");
-      document.getElementById("revealOtherBtn").style.display = "none";
-      setTimeout(() => {
-        const c = document.getElementById("cardC");
-        c.classList.add("show");
-        c.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 3000);
-    };
-  </script>
+async function syncSheet() {
+  try {
+    const res = await fetch(CONFIG.sheetUrl + "&t=" + Date.now());
+    const data = await res.text();
+    const rows = data.split("\n");
+    // 假設妳的表格：A2 是進度%, B2 是心情文字
+    const cols = rows[1].split(",");
+    document.getElementById('sheetStatus').innerText = cols[1] || "Liz 正在旅行中...";
+  } catch (e) {
+    console.log("Sheet sync failed");
+  }
+}
+</script>
 </body>
 </html>
