@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Addie's Flight Radar - Full Photo Edition</title>
+  <title>Addie's Flight Radar - 10 Nodes Edition</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Orbitron:wght@400;700&family=Cormorant+Garamond:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -48,9 +48,9 @@
     .plane-icon { font-size: 30px; }
 
     .node-wrap { display: flex; justify-content: space-between; position: absolute; top: -8px; left: 0; width: 100%; }
-    .node { width: 20px; height: 20px; background: #fff; border-radius: 50%; border: 3px solid var(--deep-blue); position: relative; }
+    .node { width: 18px; height: 18px; background: #fff; border-radius: 50%; border: 3px solid var(--deep-blue); position: relative; }
     .node.reached { background: var(--gold); border-color: #fff; }
-    .node-label { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: bold; font-family: var(--mono); }
+    .node-label { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: bold; font-family: var(--mono); }
 
     /* 拍立得相框 */
     .photo-frame { width: 100%; max-width: 250px; margin: 0 auto 20px; background: white; padding: 12px 12px 35px 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); transform: rotate(-3deg); display: none; }
@@ -63,7 +63,7 @@
     
     #betaConsole { position: fixed; bottom: 10px; right: 10px; z-index: 999; }
     .beta-btn { font-size: 8px; padding: 5px; opacity: 0.3; background: #000; color: #0f0; border: 1px solid #0f0; cursor: pointer; }
-    .beta-panel { display: none; background: #000; padding: 10px; border: 1px solid #0f0; border-radius: 8px; width: 220px; }
+    .beta-panel { display: none; background: #000; padding: 10px; border: 1px solid #0f0; border-radius: 8px; width: 240px; max-height: 80vh; overflow-y: auto; }
     .beta-panel button { width: 100%; font-size: 10px; padding: 6px; margin: 2px 0; background: #111; color: #fff; text-align: left; }
   </style>
 </head>
@@ -99,7 +99,7 @@
         
         <div class="journey-map">
           <div class="plane-container" id="planeContainer">
-            <div class="flight-tag" id="flightTag">FR147</div>
+            <div class="flight-tag" id="flightTag">--</div>
             <div class="plane-icon">✈️</div>
           </div>
           <div class="map-line"><div class="map-progress" id="mapFill"></div></div>
@@ -126,9 +126,17 @@
 
   <div id="betaConsole">
     <div class="beta-panel" id="betaPanel">
-      <button onclick="testTime('2026-02-13T22:00:00')">1. TPE > LGW (SQ312)</button>
-      <button onclick="testTime('2026-02-19T11:45:00')">3. LGW > BER (FR147)</button>
-      <button onclick="testTime('2026-03-01T10:00:00')">8. BKK LAYOVER</button>
+      <div style="color:#0f0; font-size:10px; margin-bottom:5px;">SIMULATE 10 NODES</div>
+      <button onclick="testTime('2026-02-13T22:00:00')">1. TPE ➔ LGW (SQ312)</button>
+      <button onclick="testTime('2026-02-16T12:00:00')">2. STAYING UK 🇬🇧</button>
+      <button onclick="testTime('2026-02-19T11:45:00')">3. LGW ➔ BER (FR147)</button>
+      <button onclick="testTime('2026-02-21T12:00:00')">4. STAYING BER 🇩🇪</button>
+      <button onclick="testTime('2026-02-23T07:15:00')">5. BER ➔ CDG (EJU5147)</button>
+      <button onclick="testTime('2026-02-25T12:00:00')">6. STAYING CDG 🇫🇷</button>
+      <button onclick="testTime('2026-02-28T18:00:00')">7. CDG ➔ BKK (TG931)</button>
+      <button onclick="testTime('2026-03-01T10:00:00')">8. STAYING BKK (12H) 🇹🇭</button>
+      <button onclick="testTime('2026-03-01T20:00:00')">9. BKK ➔ TPE (TG636)</button>
+      <button onclick="testTime('2026-03-02T12:00:00')">10. LANDED TPE 🏠</button>
       <button onclick="togglePanel()" style="background:#400; text-align:center;">CLOSE</button>
     </div>
     <div class="beta-btn" onclick="togglePanel()">BETA</div>
@@ -140,6 +148,7 @@
       sheetUrl: "這裡貼上妳的CSV網址" 
     };
 
+    // 精準對齊妳的 10 個旅程節點
     const FLIGHT_PLAN = [
       { id: "SQ312", from: "TPE", to: "LGW", start: "2026-02-13T17:35:00", end: "2026-02-14T06:35:00", stayLabel: "STAYING UK 🇬🇧" },
       { id: "FR147", from: "LGW", to: "BER", start: "2026-02-19T10:00:00", end: "2026-02-19T13:35:00", stayLabel: "STAYING BER 🇩🇪" },
@@ -194,6 +203,8 @@
           document.getElementById('n' + (i + 1)).classList.add('reached');
           progress = (i + 1) * step;
           action = f.stayLabel;
+        } else {
+          document.getElementById('n' + (i + 1)).classList.remove('reached');
         }
       });
 
@@ -214,7 +225,7 @@
         const rows = data.split("\n");
         const cols = rows[1].split(","); 
         
-        document.getElementById('sheetStatus').innerText = cols[1] || "衛星訊號正常。";
+        document.getElementById('sheetStatus').innerText = cols[1] || "衛星連線中...";
         
         const photoUrl = cols[2];
         const frame = document.getElementById('photoFrame');
