@@ -223,6 +223,43 @@
       document.getElementById('mapFill').style.width = Math.min(progress, 100) + "%";
       document.getElementById('planeContainer').style.left = Math.min(progress, 100) + "%";
       document.getElementById('n0').classList.add('reached');
+    }function updateRadar() {
+      const now = fakeTime || new Date();
+      let progress = 0, action = "READY FOR DEPARTURE", flying = false, callsign = "";
+      const step = 20; 
+
+      FLIGHT_PLAN.forEach((f, i) => {
+        const s = new Date(f.start), e = new Date(f.end);
+        if (now >= s && now <= e) {
+          flying = true; callsign = f.id;
+          action = `FLYING TO ${f.to} ✈️`;
+          
+          let ratio = (now - s) / (e - s);
+
+          // ✨ 在這裡調整！這裡就是控制飛機「置中感」的神祕數字
+          if (i === 3) { 
+            // 數值越小（例如 0.4 或 0.3），飛機就會越快衝向中間並在那裡待很久
+            ratio = Math.pow(ratio, 0.4); 
+          }
+
+          progress = (i * step) + (ratio * step);
+        } else if (now > e) {
+          document.getElementById('n' + (i + 1)).classList.add('reached');
+          progress = (i + 1) * step;
+          action = f.stayLabel;
+        } else {
+          document.getElementById('n' + (i + 1)).classList.remove('reached');
+        }
+      });
+
+      const tag = document.getElementById('flightTag');
+      if (flying) { tag.innerText = callsign; tag.classList.add('visible'); } 
+      else { tag.classList.remove('visible'); }
+
+      document.getElementById('currentAction').innerText = action;
+      document.getElementById('mapFill').style.width = Math.min(progress, 100) + "%";
+      document.getElementById('planeContainer').style.left = Math.min(progress, 100) + "%";
+      document.getElementById('n0').classList.add('reached');
     }
 
     async function syncSheet() {
@@ -255,3 +292,4 @@
   </script>
 </body>
 </html>
+
