@@ -190,24 +190,41 @@
       syncSheet(); updateRadar();
     };
 
-    function updateRadar() {
+function updateRadar() {
       const now = fakeTime || new Date();
-      let progress = 0, action = "READY", flying = false, callsign = "";
+      let progress = 0, action = "READY FOR DEPARTURE", flying = false, callsign = "";
+      
+      // 保持點跟點之間間距完全一樣 (100% 除以 5 段 = 每段 20%)
+      const step = 20; 
 
       FLIGHT_PLAN.forEach((f, i) => {
         const s = new Date(f.start), e = new Date(f.end);
-        const startP = NODE_POS[f.pIdx], endP = NODE_POS[f.pIdx+1];
-
         if (now >= s && now <= e) {
           flying = true; callsign = f.id;
-          action = `FLYING TO ${NODE_LABELS[f.pIdx+1]} ✈️`;
+          action = `FLYING TO ${f.to} ✈️`;
+          
           let ratio = (now - s) / (e - s);
-          // 針對 CDG->BKK 進行置中公式強化
-          if (f.pIdx === 3) ratio = Math.pow(ratio, 0.5); 
-          progress = startP + (ratio * (endP - startP));
+
+          // ✨【關鍵修改：CDG ➔ BKK 強制置中】✨
+          if (i === 3) { 
+            /* 原有的 ratio 是 0 到 1 線性移動。
+               我們改用一個「快進中段」的邏輯：
+               當飛行時間才剛開始，飛機位置就會被強推到 0.45 ~ 0.55 之間徘徊。
+            */
+            if (ratio < 0.5) {
+                // 前半段：飛機迅速從 0 衝向 0.5
+                ratio = Math.pow(ratio, 0.3) * 0.5;
+            } else {
+                // 後半段：飛機從 0.5 緩慢移向 1.0
+                ratio = 0.5 + (Math.pow((ratio - 0.5) * 2, 2) * 0.5);
+            }
+          }
+
+          progress = (i * step) + (ratio * step);
         } else if (now > e) {
           document.getElementById('n' + (i + 1)).classList.add('reached');
-          progress = endP; action = f.stay;
+          progress = (i + 1) * step;
+          action = f.stayLabel;
         } else {
           document.getElementById('n' + (i + 1)).classList.remove('reached');
         }
@@ -248,3 +265,4 @@
   </script>
 </body>
 </html>
+
