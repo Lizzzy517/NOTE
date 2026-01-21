@@ -177,4 +177,74 @@
         document.getElementById('finalEntryBtn').style.display = 'inline-block';
       } else {
         const diff = dep - now;
-        const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%
+        const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+        document.getElementById('checkinTimer').innerText = `DEPARTURE IN: ${d}d ${h}h ${m}m ${s}s`;
+        setTimeout(runClock, 1000);
+      }
+    }
+
+    document.getElementById('finalEntryBtn').onclick = () => {
+      document.getElementById('airplaneScene').style.display = 'none';
+      document.getElementById('trackerUI').style.display = 'block';
+      setInterval(updateRadar, 1000); setInterval(syncSheet, 15000);
+      syncSheet(); updateRadar();
+    };
+
+    function updateRadar() {
+      const now = fakeTime || new Date();
+      let progress = 0, action = "READY", flying = false, callsign = "";
+
+      FLIGHT_PLAN.forEach((f, i) => {
+        const s = new Date(f.start), e = new Date(f.end);
+        const startP = NODE_POS[f.pIdx], endP = NODE_POS[f.pIdx+1];
+
+        if (now >= s && now <= e) {
+          flying = true; callsign = f.id;
+          action = `FLYING TO ${NODE_LABELS[f.pIdx+1]} ✈️`;
+          let ratio = (now - s) / (e - s);
+          // 針對 CDG->BKK 進行置中公式強化
+          if (f.pIdx === 3) ratio = Math.pow(ratio, 0.5); 
+          progress = startP + (ratio * (endP - startP));
+        } else if (now > e) {
+          document.getElementById('n' + (i + 1)).classList.add('reached');
+          progress = endP; action = f.stay;
+        } else {
+          document.getElementById('n' + (i + 1)).classList.remove('reached');
+        }
+      });
+
+      const tag = document.getElementById('flightTag');
+      if (flying) { tag.innerText = callsign; tag.classList.add('visible'); } 
+      else { tag.classList.remove('visible'); }
+
+      document.getElementById('currentAction').innerText = action;
+      document.getElementById('mapFill').style.width = Math.min(progress, 100) + "%";
+      document.getElementById('planeContainer').style.left = Math.min(progress, 100) + "%";
+      document.getElementById('n0').classList.add('reached');
+    }
+
+    async function syncSheet() {
+      try {
+        const res = await fetch(CONFIG.sheetUrl + "&t=" + Date.now());
+        const data = await res.text();
+        const rows = data.split("\n");
+        const cols = rows[1].split(","); 
+        document.getElementById('sheetStatus').innerText = cols[1] || "衛星連線中...";
+        const pUrl = cols[2];
+        const frame = document.getElementById('photoFrame'), img = document.getElementById('livePhoto');
+        if (pUrl && pUrl.trim().length > 10) { img.src = pUrl.trim(); frame.style.display = 'block'; }
+        else { frame.style.display = 'none'; }
+      } catch (e) { }
+    }
+
+    function togglePanel() { const p = document.getElementById('betaPanel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; }
+    function testTime(t) { 
+      fakeTime = new Date(t); 
+      document.getElementById('boardingPass').style.display = 'none';
+      document.getElementById('airplaneScene').style.display = 'none';
+      document.getElementById('trackerUI').style.display = 'block';
+      updateRadar(); 
+    }
+  </script>
+</body>
+</html>
