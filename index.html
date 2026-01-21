@@ -7,373 +7,46 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Cormorant+Garamond:wght@400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --blue-sky-light: #87CEEB; /* ¤ÑÂÅ¦â */
-      --blue-sky-dark: #6495ED;  /* ²`¤@ÂIªºÂÅ */
-      --cloud-white: #F0F8FF;   /* ¶³¥Õ¦â */
-      --text: rgba(255,255,255,.92);
-      --gold: #d8b25c;
-      --radius: 22px;
-      --display: "Cinzel", serif;
-      --mono: "Orbitron", monospace; /* µn¾÷ÃÒ­·®æ¦rÅé */
+      --blue-sky-light: #87CEEB; --blue-sky-dark: #6495ED; --cloud-white: #F0F8FF;
+      --text: rgba(255,255,255,.92); --gold: #d8b25c; --radius: 22px;
+      --display: "Cinzel", serif; --mono: "Orbitron", monospace;
     }
-
-    body {
-      margin: 0; font-family: "Cormorant Garamond", serif; color: var(--text);
-      display: flex; align-items: center; justify-content: center; min-height: 100vh;
-      background: linear-gradient(to bottom right, var(--blue-sky-light), var(--blue-sky-dark));
-      overflow: hidden; /* ÁôÂÃºu°Ê±ø */
-      position: relative;
-    }
-
-    /* ¶³¦·®ÄªG */
-    .cloud {
-      position: absolute;
-      background: var(--cloud-white);
-      border-radius: 50%;
-      box-shadow: 0 0 25px rgba(255,255,255,0.4);
-      opacity: 0.8;
-      filter: blur(8px);
-    }
+    body { margin: 0; font-family: "Cormorant Garamond", serif; color: var(--text); display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(to bottom right, var(--blue-sky-light), var(--blue-sky-dark)); overflow-x: hidden; position: relative; }
+    
+    /* é›²æœµå‹•ç•« */
+    .cloud { position: absolute; background: var(--cloud-white); border-radius: 50%; opacity: 0.8; filter: blur(8px); z-index: 1; }
     .cloud:nth-child(1) { width: 120px; height: 70px; top: 10%; left: 15%; animation: floatCloud 25s infinite linear; }
     .cloud:nth-child(2) { width: 180px; height: 90px; top: 25%; right: 10%; animation: floatCloud 30s infinite linear reverse; }
-    .cloud:nth-child(3) { width: 90px; height: 50px; bottom: 20%; left: 25%; animation: floatCloud 20s infinite linear; }
-    .cloud:nth-child(4) { width: 200px; height: 100px; top: 5%; right: 30%; animation: floatCloud 28s infinite linear; }
-    .cloud:nth-child(5) { width: 150px; height: 80px; bottom: 10%; right: 15%; animation: floatCloud 23s infinite linear reverse; }
-    @keyframes floatCloud {
-      0% { transform: translateX(0); }
-      50% { transform: translateX(20px); }
-      100% { transform: translateX(0); }
-    }
+    @keyframes floatCloud { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(30px); } }
 
-    .wrap {
-      width: min(860px, 95%);
-      position: relative;
-      z-index: 10;
-      padding: 20px; /* ¼W¥[¤ºÃä¶Z¡AÅý¤º®e¤£³»Ãä */
-    }
+    .wrap { width: min(860px, 95%); position: relative; z-index: 10; }
+    .card-container { background: rgba(255,255,255,0.1); border-radius: var(--radius); padding: 28px; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 15px 40px rgba(0,0,0,0.3); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); text-align: center; }
 
-    .card-container {
-      background: rgba(255,255,255,0.1); /* ¥b³z©ú¡A¬Ý±o¨ì­I´º¶³¦· */
-      border-radius: var(--radius);
-      padding: 28px;
-      border: 1px solid rgba(255,255,255,0.4);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-      backdrop-filter: blur(5px); /* ¼Ò½k­I´º¡A§ó¹³¾÷¿µµ¡¥~ */
-      -webkit-backdrop-filter: blur(5px);
-    }
-
-    /* Boarding Pass Style */
-    #boardingPass {
-      background: linear-gradient(160deg, #F0F8FF, #E0EBF5);
-      color: #333;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      max-width: 400px;
-      margin: 0 auto;
-      text-align: left;
-      font-family: var(--mono);
-      position: relative;
-      overflow: hidden;
-      border: 1px dashed rgba(0,0,0,0.1);
-    }
-    #boardingPass::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="50" font-family="Arial" font-size="20" fill="%23e0e0e0" text-anchor="middle" dominant-baseline="middle" transform="rotate(-45 50 50)">BOARDING PASS</text></svg>');
-      background-size: 150px 150px;
-      opacity: 0.1;
-      z-index: 0;
-    }
-    .bp-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 20px;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-      padding-bottom: 15px;
-    }
-    .bp-header img { height: 30px; }
-    .bp-header h2 { font-family: var(--display); font-size: 20px; color: var(--blue-sky-dark); margin: 0; }
-    .bp-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-    .bp-field { font-size: 12px; }
-    .bp-field span { display: block; font-size: 18px; font-weight: bold; color: #000; margin-top: 3px; }
-    .bp-message { text-align: center; font-size: 14px; color: #555; margin-bottom: 15px; }
-    .barcode { width: 80%; height: 50px; background: repeating-linear-gradient(90deg, black 0 2px, white 2px 4px); margin: 0 auto 15px; }
+    /* Boarding Pass */
+    #boardingPass { background: linear-gradient(160deg, #F0F8FF, #E0EBF5); color: #333; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); max-width: 400px; margin: 0 auto; text-align: left; font-family: var(--mono); border: 1px dashed rgba(0,0,0,0.1); }
+    .bp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 10px; }
+    .bp-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .bp-field { font-size: 10px; color: #666; }
+    .bp-field span { display: block; font-size: 15px; font-weight: bold; color: #000; }
+    .barcode { width: 100%; height: 40px; background: repeating-linear-gradient(90deg, #000 0 2px, #fff 2px 4px); margin-top: 15px; }
     
-    .bp-button {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .bp-button button {
-      background: linear-gradient(45deg, var(--gold), #f9d98e);
-      color: #333;
-      padding: 12px 30px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-family: var(--mono);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
-      font-size: 16px;
-    }
-    .bp-button button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    }
-
     /* Airplane Scene */
-    #airplaneScene {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 400px;
-      padding: 20px;
-      text-align: center;
-    }
-    .airplane {
-      width: 150px;
-      height: auto;
-      transform: rotate(5deg);
-      margin-bottom: 30px;
-      filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.3));
-      animation: flyPlane 30s infinite linear;
-    }
-    @keyframes flyPlane {
-      0% { transform: translate(-10px, 0px) rotate(5deg); }
-      25% { transform: translate(10px, -5px) rotate(4deg); }
-      50% { transform: translate(-10px, 0px) rotate(5deg); }
-      75% { transform: translate(10px, 5px) rotate(6deg); }
-      100% { transform: translate(-10px, 0px) rotate(5deg); }
-    }
+    #airplaneScene { display: none; flex-direction: column; align-items: center; padding: 20px; }
+    .airplane { width: 100px; animation: flyPlane 4s infinite ease-in-out; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.2)); }
+    @keyframes flyPlane { 0%, 100% { transform: translateY(0) rotate(5deg); } 50% { transform: translateY(-15px) rotate(3deg); } }
+    .checkin-status { font-family: var(--display); font-size: 24px; color: var(--gold); margin: 20px 0 10px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
 
-    .checkin-status {
-      font-family: var(--display);
-      font-size: 24px;
-      color: var(--gold);
-      margin-bottom: 15px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
-    .checkin-subtext {
-      font-size: 16px;
-      color: rgba(255,255,255,0.9);
-      max-width: 400px;
-      margin-bottom: 30px;
-    }
+    /* Main Flow */
+    #flow { display: none; }
+    .countdown { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+    .tile { background: rgba(255,255,255,0.15); padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); }
+    .num { font-family: var(--mono); font-size: 20px; font-weight: bold; display: block; }
+    .label { font-size: 10px; color: var(--gold); }
+    .journey-wrap { margin: 20px 0; }
+    .progress-bar { width: 100%; height: 10px; background: rgba(0,0,0,0.2); border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #f9d98e); width: 0%; transition: width 2s; }
 
-    /* Existing Styles (adjusted for new theme) */
-    #title { font-family: var(--display); color: var(--gold); text-shadow: 2px 2px 5px rgba(0,0,0,0.4); margin: 0;}
-    .countdown, .journey-wrap {
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      border: 1px solid rgba(255,255,255,0.2);
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-    }
-    .tile { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
-    .num { color: var(--cloud-white); }
-    .label { color: var(--gold); }
-    .progress-meta { color: var(--cloud-white); }
-    #travelStatus { color: rgba(255,255,255,0.8); }
-
-    .fateRevealTitle { font-family: var(--display); font-size: 20px; color: var(--gold); margin-bottom: 8px; }
-    .fateRevealMeta { font-size: 14px; white-space: pre-line; color: rgba(255,255,255,0.9); }
-    #openingText { text-align: center; white-space: pre-line; font-style: italic; margin-bottom: 25px; color: var(--cloud-white); }
-    .primary { background: linear-gradient(135deg, var(--gold), #f9d98e); color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-    .primary:hover { transform: scale(1.03); }
-
-    #flow { display: none; } /* ¹w³]ÁôÂÃ¡A«Ý check-in «á¤~Åã¥Ü */
-  </style>
-</head>
-<body>
-  <div class="cloud"></div>
-  <div class="cloud"></div>
-  <div class="cloud"></div>
-  <div class="cloud"></div>
-  <div class="cloud"></div>
-
-  <main class="wrap">
-    <section class="card-container">
-      <h1 id="mainTitle" style="font-family: var(--display); color: var(--gold); margin:0; text-align: center; margin-bottom: 30px;">Your Journey Awaits</h1>
-      
-      <div id="boardingPass">
-        <div class="bp-header">
-          <h2>BOARDING PASS</h2>
-          <img src="https://www.flaticon.com/svg/v2/icons/svg/1057/1057088.svg" alt="Airplane Icon" style="filter: invert(40%) sepia(80%) saturate(1000%) hue-rotate(200deg) brightness(90%);">
-        </div>
-        <div class="bp-info">
-          <div class="bp-field">FROM<span>TAIWAN (TPE)</span></div>
-          <div class="bp-field">TO<span>EUROPE (???)</span></div>
-          <div class="bp-field">PASSENGER<span>ADDIE</span></div>
-          <div class="bp-field">DATE<span>MAR 06, 2026</span></div>
-          <div class="bp-field">FLIGHT<span>LOVELINE-0306</span></div>
-          <div class="bp-field">SEAT<span>AISLE A</span></div>
-        </div>
-        <p class="bp-message">Your exclusive journey is about to begin. Please proceed to check-in.</p>
-        <div class="barcode"></div>
-        <div class="bp-button">
-          <button id="startJourneyBtn">START JOURNEY</button>
-        </div>
-      </div>
-
-      <div id="airplaneScene">
-        <img src="https://www.flaticon.com/svg/v2/icons/svg/1057/1057088.svg" alt="Airplane" class="airplane">
-        <h2 class="checkin-status">©|¥¼¶}©ñ Check-in</h2>
-        <p class="checkin-subtext">¿Ë·Rªº Addie¡A­¸¦æ­û¥¿¦b½T»{¯è½u»P¾÷¿µÀ£¤O¡A½Ðµy­Ô¡C·í­¸¦æ·Ç³Æ§¹¦¨¡A¿µªù´N·|¬°©p¶}±Ò¡C</p>
-        <div id="countdownBeforeOpen" style="font-family: var(--mono); font-size: 16px; color: rgba(255,255,255,0.7); margin-top: 15px;">­Ë¼Æ¤¤...</div>
-      </div>
-
-      <div id="flow">
-        <h1 id="title" style="font-family: var(--display); color: var(--gold); margin:0; text-align: center; margin-bottom: 20px;">Hi, Addie!</h1>
-        <div class="countdown">
-          <div class="tile"><span class="num" id="d">0</span><span class="label">days</span></div>
-          <div class="tile"><span class="num" id="h">0</span><span class="label">hours</span></div>
-          <div class="tile"><span class="num" id="m">0</span><span class="label">mins</span></div>
-          <div class="tile"><span class="num" id="s">0</span><span class="label">secs</span></div>
-        </div>
-        <div class="journey-wrap">
-          <div class="progress-meta">EUROPE SURPRISE LOADING: <span id="percentText">0</span>%</div>
-          <div class="progress-bar"><div class="progress-fill" id="barFill"></div></div>
-          <p id="travelStatus">?? ¥¿¦b·j´M½Ã¬P°T¸¹...</p>
-        </div>
-        
-        <p id="openingText" style="text-align:center; white-space: pre-line; font-style: italic; margin-bottom: 25px;"></p>
-        <div class="cards">
-          <div class="fate" id="cardA" onclick="handlePick('A')">
-            <div class="fateInner"><div class="fateFace fateFront"><p class="fateTitle">Card A</p><span style="font-size:12px;color:var(--gold)">? tap to pick</span></div>
-            <div class="fateFace fateBack"><div class="pickBadge">YOU CHOSE</div><p class="fateRevealTitle">A CUT ¡P °ê»«</p><p class="fateRevealMeta" id="metaA"></p>
-            <a id="linkA" target="_blank" style="color:var(--gold); font-size:12px;">View Map</a></div></div>
-          </div>
-          <div class="fate" id="cardB" onclick="handlePick('B')">
-            <div class="fateInner"><div class="fateFace fateFront"><p class="fateTitle">Card B</p><span style="font-size:12px;color:var(--gold)">? tap to pick</span></div>
-            <div class="fateFace fateBack"><div class="pickBadge">YOU CHOSE</div><p class="fateRevealTitle">º~¨Ó¶º©±¤@±ß</p><p class="fateRevealMeta" id="metaB"></p>
-            <a id="linkB" target="_blank" style="color:var(--gold); font-size:12px;">View Map</a></div></div>
-          </div>
-          <div id="cardC">
-             <div class="fateRevealTitle" style="text-align:center;">Actually... ??</div>
-             <p class="fateRevealMeta" style="text-align:center;" id="metaC"></p>
-             <div class="receipt-wrapper">
-               <div class="receipt-box"><img src="" id="imgA" class="receipt-img"><div class="stamp">CONFIRMED</div></div>
-               <div class="receipt-box"><img src="" id="imgB" class="receipt-img"><div class="stamp">CONFIRMED</div></div>
-             </div>
-             <p style="margin-top:25px; font-family:var(--display); color:var(--gold); text-align:center; font-weight:bold;">Happy Birthday, Addie! ??</p>
-          </div>
-        </div>
-        <div id="stepActions" style="display:none; justify-content:center; margin-top:25px;"><button class="primary" id="revealOtherBtn">¬Ý¬Ý¥t¤@­Ó¿ï¶µ</button></div>
-      </div>
-    </section>
-  </main>
-
-  <script>
-    const CONFIG = {
-      to: "Addie",
-      targetDate: "2026-03-06T00:00:00", // ºë½T¨ì¬í¡A½T«O­Ë¼Æ·Ç½T
-      
-      // ? ³o¸Ì¶K¤W©pªº Google CSV ³sµ²¡A¥Î©ó¶i«×±ø
-      sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSXXXXXXXX/pub?output=csv", 
-      
-      // ? ¦a¹Ï³sµ²
-      mapA: "https://www.google.com/maps/search/?api=1&query=A+CUT+Steakhouse",
-      mapB: "https://www.google.com/maps/search/?api=1&query=Grand+Hi-Lai+Hotel+Taipei",
-      
-      // ? ¹Ï¤ùºI¹Ï³sµ²
-      receiptA: "©pªºDiscord¹Ï¤ùºô§}1",
-      receiptB: "©pªºDiscord¹Ï¤ùºô§}2",
-      
-      // ¤º¤å»y®ð
-      textA: "2026/3/6 19:00\n¥u­n¬ü¬ü¦a¥X²{´N¦n??",
-      textB: "2026/3/7 Check-in\n¹j¤ÑÁÙ¦³®q»y¦­À\­ò¡I",
-      textC: "¬Ý©p¦b¨ºÃä¿ï³o»ò¤[¡A¨ä¹ê§Ú¥þ³£­q¤F°Õ¡I\n¥Í¤é¦æµ{´N¬O A CUT ±ßÀ\ + º~¨Ó¦í¤@±ß¡I",
-      opening: `Pick a card ?? Choose your fate ?\n¥Ñ©R¹B¨M©w§A¤µ¦~ªº¥Í¤é«ç»ò¹L`,
-      
-      // ? ·s¼W¡G¦ó®É¶}©ñ Check-in (©p¥X°êªº¤é´Á»P®É¶¡)
-      checkinOpenTime: "2024-07-20T10:00:00" // ¨Ò¦p¡G©p¹w­p 2024/07/20 ¦­¤W 10 ÂI¥X°ê
-    };
-
-    let picked = null;
-    let checkinInterval; // ¥Î©óÀx¦s checkin ­Ë¼Æªº interval
-
-    // Functions for existing features
-    async function syncProgress() { /* ... (same as before) ... */ }
-    function updateCountdown() { /* ... (same as before) ... */ }
-
-    // ·s¼W¡GCheck-in ­Ë¼ÆÅÞ¿è
-    function updateCheckinCountdown() {
-      const now = new Date();
-      const openTime = new Date(CONFIG.checkinOpenTime);
-      const diff = openTime - now;
-
-      if (diff <= 0) {
-        clearInterval(checkinInterval);
-        document.getElementById("countdownBeforeOpen").innerText = "Check-in ¤w¶}©ñ¡I";
-        document.getElementById("startJourneyBtn").innerText = "¥ß§Yµn¾÷¡I"; // «ö¶s¤å¦rÅÜ§ó
-        document.getElementById("startJourneyBtn").onclick = openMainFlow; // ¤¹³\¶i¤J¥D¬yµ{
-        return;
-      }
-
-      const d = Math.floor(diff / 86400000);
-      const h = Math.floor((diff % 86400000) / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-
-      document.getElementById("countdownBeforeOpen").innerText = 
-        `ÁÙ¦³ ${d}¤Ñ ${h}¤p®É ${m}¤À ${s}¬í ¶}©ñ Check-in`;
-    }
-
-    // ¶i¤J¥D¬yµ{ (Åã¥Ü¥d¤ù¡B¶i«×±øµ¥)
-    function openMainFlow() {
-      document.getElementById("mainTitle").style.display = "none"; // ÁôÂÃ¤j¼ÐÃD
-      document.getElementById("boardingPass").style.display = "none";
-      document.getElementById("airplaneScene").style.display = "none"; // ÁôÂÃ­¸¾÷µe­±
-      document.getElementById("flow").style.display = "block"; // Åã¥Ü¥DÅé¤º®e
-      
-      document.getElementById("title").innerText = "Hi, " + CONFIG.to; // ³o¸Ì¬O¥DÅéªº¼ÐÃD
-      document.getElementById("openingText").innerText = CONFIG.opening;
-      document.getElementById("linkA").href = CONFIG.mapA;
-      document.getElementById("linkB").href = CONFIG.mapB;
-      document.getElementById("imgA").src = CONFIG.receiptA;
-      document.getElementById("imgB").src = CONFIG.receiptB;
-      document.getElementById("metaA").innerText = CONFIG.textA;
-      document.getElementById("metaB").innerText = CONFIG.textB;
-      document.getElementById("metaC").innerText = CONFIG.textC;
-
-      // ¶}©l¥DÅéªº¦Û°Ê§ó·s
-      setInterval(updateCountdown, 1000);
-      setInterval(syncProgress, 30000);
-      updateCountdown();
-      syncProgress();
-    }
-
-    // Main logic on page load
-    window.onload = () => {
-      document.getElementById("startJourneyBtn").onclick = () => {
-        document.getElementById("mainTitle").style.display = "none"; // ÁôÂÃ¤j¼ÐÃD
-        document.getElementById("boardingPass").style.display = "none";
-        document.getElementById("airplaneScene").style.display = "flex"; // Åã¥Ü­¸¾÷µe­±
-
-        // ±Ò°Ê Check-in ­Ë¼Æ
-        updateCheckinCountdown();
-        checkinInterval = setInterval(updateCheckinCountdown, 1000);
-      };
-    };
-
-    function handlePick(id) {
-      if (picked) return;
-      picked = id;
-      document.getElementById("card" + id).classList.add("revealed", "is-picked");
-      document.getElementById("stepActions").style.display = "flex";
-    }
-
-    document.getElementById("revealOtherBtn").onclick = () => {
-      const otherId = (picked === 'A') ? 'cardB' : 'cardA';
-      document.getElementById(otherId).classList.add("revealed");
-      document.getElementById("revealOtherBtn").style.display = "none";
-      setTimeout(() => {
-        const c = document.getElementById("cardC");
-        c.classList.add("show");
-        c.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 3000);
-    };
-  </script>
-</body>
-</html>
+    /* Cards */
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; perspective: 1000px; }
+    .fate { height: 180px; cursor: pointer; }
+    .fateInner { position: relative; width: 100
