@@ -122,11 +122,11 @@
   </div>
 
   <script>
-const CONFIG = { 
-  sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5jpWMX7wsapbbktd_fSsiTt4upzxxGi1ydGf9Wt8dfUISCvcdgzZ3oNc6ClwBB8AebBUgmZFvO-lV/pub?output=csv" 
-};
+    // ✅ 已自動更換為妳的 CSV 連結，並修正格式
+    const CONFIG = { 
+      sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5jpWMX7wsapbbktd_fSsiTt4upzxxGi1ydGf9Wt8dfUISCvcdgzZ3oNc6ClwBB8AebBUgmZFvO-lV/pub?output=csv" 
+    };
 
-    // 等距座標：5段飛行，圓點位置分別是 0, 20, 40, 60, 80, 100
     const NODE_POS = [0, 20, 40, 60, 80, 100]; 
     const NODE_LABELS = ["TPE", "LGW", "BER", "CDG", "BKK", "TPE"];
 
@@ -174,9 +174,8 @@ const CONFIG = {
       document.getElementById('airplaneScene').style.display = 'none';
       document.getElementById('trackerUI').style.display = 'block';
       setInterval(updateRadar, 1000); 
-      setInterval(syncSheet, 15000); // 每 15 秒更新一次
-syncSheet(); // 進入畫面立刻更新一次
-      
+      setInterval(syncSheet, 15000);
+      syncSheet(); updateRadar();
     };
 
     function updateRadar() {
@@ -190,13 +189,7 @@ syncSheet(); // 進入畫面立刻更新一次
           flying = true; callsign = f.id;
           action = `FLYING TO ${NODE_LABELS[i+1]} ✈️`;
           let ratio = (now - s) / (e - s);
-
-          // ✨【CDG ➔ BKK 視覺置中強化】✨
-          if (i === 3) { 
-            // 讓比率在 0.1~0.9 之間時，視覺上都盡量靠近中心
-            ratio = (1 - Math.cos(ratio * Math.PI)) / 2;
-          }
-
+          if (i === 3) { ratio = (1 - Math.cos(ratio * Math.PI)) / 2; }
           progress = (i * step) + (ratio * step);
         } else if (now > e) {
           document.getElementById('n' + (i + 1)).classList.add('reached');
@@ -217,49 +210,34 @@ syncSheet(); // 進入畫面立刻更新一次
       document.getElementById('n0').classList.add('reached');
     }
 
+    // ✅ 重點！修正試算表讀取逻辑
     async function syncSheet() {
       try {
-        const res = await fetch(CONFIG.sheetUrl + "&t=" + Date.now());
-        const data = await res.text();
-        const rows = data.split("\n");
-        const cols = rows[1].split(","); 
-        document.getElementById('sheetStatus').innerText = cols[1] || "衛星連線中...";
-        const pUrl = cols[2];
-        const frame = document.getElementById('photoFrame'), img = document.getElementById('livePhoto');
-        if (pUrl && pUrl.trim().length > 10) { img.src = pUrl.trim(); frame.style.display = 'block'; }
-        else { frame.style.display = 'none'; }
-      } catch (e) { }
-    }
-async function syncSheet() {
-      try {
-        console.log("正在嘗試連線 Google Sheet..."); // 妳可以在瀏覽器按 F12 看到這個
-        const res = await fetch(CONFIG.sheetUrl + "&t=" + Date.now());
-        const data = await res.text();
-        const rows = data.split("\n");
+        const res = await fetch(CONFIG.sheetUrl + "&cachebreak=" + Date.now());
+        const text = await res.text();
+        const rows = text.split("\n").map(r => r.split(","));
         
-        // 抓取第二列 (index 1)
+        // 抓取第二列 (rows[1])
         if (rows.length > 1) {
-          const cols = rows[1].split(","); 
-          // cols[1] 是 B 欄 (文字)，cols[2] 是 C 欄 (照片)
-          document.getElementById('sheetStatus').innerText = cols[1] || "Liz 正在趕路中...";
+          const message = rows[1][1]; // B 欄
+          const photo = rows[1][2];  // C 欄
           
-          const pUrl = cols[2] ? cols[2].trim() : "";
+          if(message) document.getElementById('sheetStatus').innerText = message.replace(/"/g, "");
+          
           const frame = document.getElementById('photoFrame');
           const img = document.getElementById('livePhoto');
-          
-          if (pUrl.length > 10) { 
-            img.src = pUrl; 
-            frame.style.display = 'block'; 
+          if (photo && photo.trim().length > 10) {
+            img.src = photo.trim().replace(/"/g, "");
+            frame.style.display = 'block';
           } else {
             frame.style.display = 'none';
           }
         }
-      } catch (e) {
-        console.error("連線失敗:", e);
-        document.getElementById('sheetStatus').innerText = "衛星連線暫時中斷...";
+      } catch (err) {
+        console.log("Sheet Sync Error", err);
       }
     }
-    // ✨ 修正後的 BETA 控制函式 ✨
+
     function togglePanel() { 
       const p = document.getElementById('betaPanel'); 
       p.style.display = (p.style.display === 'block') ? 'none' : 'block'; 
@@ -267,16 +245,12 @@ async function syncSheet() {
 
     function testTime(t) { 
       fakeTime = new Date(t); 
-      // 確保切換到雷達畫面
       document.getElementById('boardingPass').style.display = 'none';
       document.getElementById('airplaneScene').style.display = 'none';
       document.getElementById('trackerUI').style.display = 'block';
       updateRadar(); 
+      syncSheet();
     }
   </script>
 </body>
 </html>
-
-
-
-
