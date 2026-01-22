@@ -240,9 +240,11 @@
               `<img src="${photo}" style="width: 100%; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.2);">` : "";
 
             entry.innerHTML = `
-              <div style="font-size: 10px; color: var(--gold); font-family: var(--mono); margin-bottom: 5px;">TIMELOG: ${time}</div>
+              <div style="display: inline-block; padding: 2px 8px; background: rgba(0,0,0,0.3); border-radius: 4px; font-size: 11px; color: #fff; font-family: var(--mono); margin-bottom: 8px; border: 1px solid var(--gold); letter-spacing: 1px;">
+                <span style="color: var(--gold);">●</span> TIMELOG: ${time}
+              </div>
               ${photoHtml}
-              <div style="font-size: 16px; line-height: 1.6; color: white; white-space: pre-wrap; font-family: sans-serif;">${story}</div>
+              <div style="font-size: 16px; line-height: 1.6; color: white; white-space: pre-wrap; font-family: sans-serif; padding-top: 5px;">${story}</div>
             `;
             logContainer.appendChild(entry);
           }
@@ -272,3 +274,4 @@
   </script>
 </body>
 </html>
+
