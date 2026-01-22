@@ -211,33 +211,44 @@
     }
 
     // ✅ 重點！修正試算表讀取逻辑
-    async function syncSheet() {
+async function syncSheet() {
       try {
-        const res = await fetch(CONFIG.sheetUrl + "&cachebreak=" + Date.now());
+        const res = await fetch(CONFIG.sheetUrl + "&cb=" + Date.now());
         const text = await res.text();
-        const rows = text.split("\n").map(r => r.split(","));
+        const rows = text.split("\n").filter(r => r.trim() !== "").map(r => r.split(","));
         
-        // 抓取第二列 (rows[1])
-        if (rows.length > 1) {
-          const message = rows[1][1]; // B 欄
-          const photo = rows[1][2];  // C 欄
+        if (rows.length > 0) {
+          // 如果有第二列就抓第二列(rows[1])，否則抓第一列(rows[0])
+          const targetRow = rows.length > 1 ? rows[1] : rows[0];
           
-          if(message) document.getElementById('sheetStatus').innerText = message.replace(/"/g, "");
+          // 自動尋找第一個看起來像文字的格子 (排除 A 欄的時間)
+          // 我們優先嘗試 B 欄 (index 1)，不行就嘗試 A 欄 (index 0)
+          let message = (targetRow[1] || targetRow[0] || "").replace(/"/g, "").trim();
+          let photo = (targetRow[2] || "").replace(/"/g, "").trim();
+
+          const statusEl = document.getElementById('sheetStatus');
           
+          // 如果抓到的字跟標題一樣，代表妳還沒填資料
+          if (message === "時間" || message === "狀態文字" || message === "") {
+            statusEl.innerText = "Liz 尚未更新狀態...";
+          } else {
+            statusEl.innerText = message;
+          }
+
           const frame = document.getElementById('photoFrame');
           const img = document.getElementById('livePhoto');
-          if (photo && photo.trim().length > 10) {
-            img.src = photo.trim().replace(/"/g, "");
+          // 檢查 C 欄是否為有效網址
+          if (photo.startsWith('http')) {
+            img.src = photo;
             frame.style.display = 'block';
           } else {
             frame.style.display = 'none';
           }
         }
       } catch (err) {
-        console.log("Sheet Sync Error", err);
+        console.log("連線同步中...");
       }
     }
-
     function togglePanel() { 
       const p = document.getElementById('betaPanel'); 
       p.style.display = (p.style.display === 'block') ? 'none' : 'block'; 
@@ -254,3 +265,4 @@
   </script>
 </body>
 </html>
+
