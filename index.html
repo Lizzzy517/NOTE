@@ -48,11 +48,11 @@
     .node.reached { background: var(--gold); border-color: #fff; }
     .node-label { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: bold; font-family: var(--mono); color: white; }
 
-    .photo-frame { width: 100%; max-width: 250px; margin: 0 auto 20px; background: white; padding: 12px 12px 35px 12px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); transform: rotate(-3deg); display: none; }
-    .photo-frame img { width: 100%; height: auto; display: block; border: 1px solid #eee; }
-
     .report-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(216,178,92,0.3); border-radius: 15px; padding: 20px; margin-top: 30px; }
-    #sheetStatus { font-style: italic; color: var(--gold); font-size: 18px; margin-top: 10px; }
+    #logContainer { max-height: 350px; overflow-y: auto; scrollbar-width: none; }
+    #logContainer::-webkit-scrollbar { display: none; }
+
+    .log-entry { margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.08); border-radius: 12px; border-left: 4px solid var(--gold); text-align: left; }
 
     button { padding: 15px 40px; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; font-family: var(--mono); background: var(--gold); color: #000; transition: 0.3s; }
     
@@ -94,10 +94,14 @@
           <div class="map-line"><div class="map-progress" id="mapFill"></div></div>
           <div class="node-wrap" id="nodeContainer"></div>
         </div>
+
         <div class="report-box">
-          <div class="photo-frame" id="photoFrame"><img src="" id="livePhoto"></div>
-          <div style="font-size:11px; text-transform:uppercase; color:var(--gold); font-family:var(--mono);">Message from Liz:</div>
-          <div id="sheetStatus">Waiting for signal...</div>
+          <div style="font-size:11px; text-transform:uppercase; color:var(--gold); font-family:var(--mono); margin-bottom:12px; border-bottom:1px solid rgba(216,178,92,0.3); padding-bottom:5px;">
+            Current Location Journey Notes:
+          </div>
+          <div id="logContainer">
+            <div id="sheetStatus">Waiting for local signal...</div>
+          </div>
         </div>
       </div>
     </section>
@@ -107,7 +111,7 @@
     <div class="beta-panel" id="betaPanel">
       <div style="color:#0f0; font-size:10px; margin-bottom:5px;">TEST JOURNEY STAGES</div>
       <button onclick="testTime('2026-02-13T22:00:00')">1. ✈️ TPE ➔ LGW</button>
-      <button onclick="testTime('2026-02-16T12:00:00')">2. 🇬🇧 STAYING UK</button>
+      <button onclick="testTime('2026-02-16T12:00:00')">2. 🇬🇧 STAYING UK (LGW)</button>
       <button onclick="testTime('2026-02-19T11:45:00')">3. ✈️ LGW ➔ BER</button>
       <button onclick="testTime('2026-02-21T12:00:00')">4. 🇩🇪 STAYING BER</button>
       <button onclick="testTime('2026-02-23T07:15:00')">5. ✈️ BER ➔ CDG</button>
@@ -122,7 +126,6 @@
   </div>
 
   <script>
-    // ✅ 已自動更換為妳的 CSV 連結，並修正格式
     const CONFIG = { 
       sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5jpWMX7wsapbbktd_fSsiTt4upzxxGi1ydGf9Wt8dfUISCvcdgzZ3oNc6ClwBB8AebBUgmZFvO-lV/pub?output=csv" 
     };
@@ -140,7 +143,6 @@
 
     let fakeTime = null;
 
-    // 初始化圓點
     const nc = document.getElementById('nodeContainer');
     NODE_POS.forEach((p, i) => {
       const d = document.createElement('div');
@@ -210,45 +212,50 @@
       document.getElementById('n0').classList.add('reached');
     }
 
-    // ✅ 重點！修正試算表讀取逻辑
-async function syncSheet() {
+    // ✨ 核心升級：自動篩選地點的同步函式
+    async function syncSheet() {
       try {
         const res = await fetch(CONFIG.sheetUrl + "&cb=" + Date.now());
         const text = await res.text();
-        const rows = text.split("\n").filter(r => r.trim() !== "").map(r => r.split(","));
+        // 處理包含逗號的內容解析
+        const rows = text.split("\n").filter(r => r.trim() !== "").map(r => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
         
-        if (rows.length > 0) {
-          // 如果有第二列就抓第二列(rows[1])，否則抓第一列(rows[0])
-          const targetRow = rows.length > 1 ? rows[1] : rows[0];
-          
-          // 自動尋找第一個看起來像文字的格子 (排除 A 欄的時間)
-          // 我們優先嘗試 B 欄 (index 1)，不行就嘗試 A 欄 (index 0)
-          let message = (targetRow[1] || targetRow[0] || "").replace(/"/g, "").trim();
-          let photo = (targetRow[2] || "").replace(/"/g, "").trim();
+        const currentAction = document.getElementById('currentAction').innerText;
+        const logContainer = document.getElementById('logContainer');
+        logContainer.innerHTML = ""; 
 
-          const statusEl = document.getElementById('sheetStatus');
-          
-          // 如果抓到的字跟標題一樣，代表妳還沒填資料
-          if (message === "時間" || message === "狀態文字" || message === "") {
-            statusEl.innerText = "Liz 尚未更新狀態...";
-          } else {
-            statusEl.innerText = message;
-          }
+        // 從第二列開始遍歷
+        for (let i = 1; i < rows.length; i++) {
+          const time = rows[i][0] ? rows[i][0].replace(/"/g, "").trim() : "";
+          const locationKey = rows[i][1] ? rows[i][1].replace(/"/g, "").trim() : ""; // B欄
+          const photo = rows[i][2] ? rows[i][2].replace(/"/g, "").trim() : "";       // C欄
+          const story = rows[i][3] ? rows[i][3].replace(/"/g, "").trim() : "";       // D欄
 
-          const frame = document.getElementById('photoFrame');
-          const img = document.getElementById('livePhoto');
-          // 檢查 C 欄是否為有效網址
-          if (photo.startsWith('http')) {
-            img.src = photo;
-            frame.style.display = 'block';
-          } else {
-            frame.style.display = 'none';
+          // 核心檢查：如果當前地點關鍵字包含在當前雷達狀態中，就顯示
+          if (currentAction.toUpperCase().includes(locationKey.toUpperCase()) && locationKey !== "") {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+
+            let photoHtml = (photo && photo.startsWith('http')) ? 
+              `<img src="${photo}" style="width: 100%; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.2);">` : "";
+
+            entry.innerHTML = `
+              <div style="font-size: 10px; color: var(--gold); font-family: var(--mono); margin-bottom: 5px;">TIMELOG: ${time}</div>
+              ${photoHtml}
+              <div style="font-size: 16px; line-height: 1.6; color: white; white-space: pre-wrap; font-family: sans-serif;">${story}</div>
+            `;
+            logContainer.appendChild(entry);
           }
         }
+
+        if (logContainer.innerHTML === "") {
+          logContainer.innerHTML = '<div style="text-align:center; padding:30px; color:rgba(255,255,255,0.3); font-style:italic; font-size:14px;">Liz 尚未在此處留下紀錄...</div>';
+        }
       } catch (err) {
-        console.log("連線同步中...");
+        console.log("Connecting to Satellite...");
       }
     }
+
     function togglePanel() { 
       const p = document.getElementById('betaPanel'); 
       p.style.display = (p.style.display === 'block') ? 'none' : 'block'; 
@@ -265,4 +272,3 @@ async function syncSheet() {
   </script>
 </body>
 </html>
-
